@@ -19,12 +19,12 @@ export default function CustomerQRTicketPage() {
       </div>
 
       {selectedBooking ? (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
+        <div className="qrt-layout">
           <div>
             <QRTicket booking={selectedBooking} />
           </div>
 
-          <div className="card" style={{ padding: 22 }}>
+          <div className="card" style={{ padding: 20 }}>
             <h4 style={{ fontFamily: 'var(--disp)', fontSize: 18, marginBottom: 14 }}>
               All Reservation History ({bookings.length})
             </h4>
@@ -40,16 +40,16 @@ export default function CustomerQRTicketPage() {
                     className="hist-top"
                     onClick={() => setSelectedBooking(b)}
                   >
-                    <div>
+                    <div style={{ minWidth: 0 }}>
                       <span className="mono">{b.id}</span>
-                      <b style={{ display: 'block' }}>
+                      <b style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {b.fish} · {b.qty} Kg
                       </b>
                     </div>
                     <div className="rt">
                       <div>
-                        <small style={{ color: 'var(--mut)', fontSize: 12, display: 'block' }}>
-                          {b.date} · {b.time}
+                        <small style={{ color: 'var(--mut)', fontSize: 11, display: 'block', whiteSpace: 'nowrap' }}>
+                          {b.date}
                         </small>
                         <span className={`tag ${b.status === 'Active' ? 'warn' : 'ok'}`}>
                           {b.status.toUpperCase()}

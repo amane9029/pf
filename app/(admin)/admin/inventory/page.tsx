@@ -136,7 +136,7 @@ export default function AdminInventoryPage() {
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13 }}>
+              <div className="form-grid-2">
                 <div className="field">
                   <label>Stock (Kg)</label>
                   <input
@@ -202,7 +202,7 @@ export default function AdminInventoryPage() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13 }}>
+              <div className="form-grid-2">
                 <div className="field">
                   <label>Category</label>
                   <select value={newFishCat} onChange={(e) => setNewFishCat(e.target.value)}>

@@ -27,7 +27,7 @@ export default function AdminNotificationsPage() {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1.1fr .9fr', gap: 24 }}>
+    <div className="admin-notif-layout">
       <div>
         <div className="sec-head" style={{ marginBottom: 20 }}>
           <h2>Broadcast Push Notifications</h2>
