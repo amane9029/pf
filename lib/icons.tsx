@@ -22,7 +22,8 @@ export type IconName =
   | 'plus'
   | 'edit'
   | 'users'
-  | 'doc';
+  | 'doc'
+  | 'menu';
 
 interface IconProps {
   name: IconName | string;
@@ -32,6 +33,14 @@ interface IconProps {
 
 export const Icon: React.FC<IconProps> = ({ name, className = 'ic', style }) => {
   switch (name) {
+    case 'menu':
+      return (
+        <svg className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      );
     case 'fish':
       return (
         <svg
@@ -44,7 +53,6 @@ export const Icon: React.FC<IconProps> = ({ name, className = 'ic', style }) => 
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          {/* Elegant streamlined fresh fish silhouette */}
           <path d="M2 12C5.5 6.5 13 5.5 18 9.5L22 6.5V17.5L18 14.5C13 18.5 5.5 17.5 2 12Z" />
           <path d="M18 9.5C16.5 11 16.5 13 18 14.5" />
           <circle cx="6.5" cy="10.5" r="1" fill="currentColor" />

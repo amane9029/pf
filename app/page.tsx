@@ -12,6 +12,7 @@ export default function LandingPage() {
   const { fishCatalog, showToast } = usePondFish();
   const router = useRouter();
 
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [selectedFish, setSelectedFish] = useState<FishItem | null>(null);
   const [contactName, setContactName] = useState('');
   const [contactPhone, setContactPhone] = useState('');
@@ -32,23 +33,25 @@ export default function LandingPage() {
 
   return (
     <section className="portal" id="pt-landing">
-      {/* LANDING HEADER */}
+      {/* LANDING HEADER - FULL WIDTH EDGE TO EDGE */}
       <header className="lnd-head">
-        <div className="wrap lnd-nav">
+        <div className="lnd-nav">
           <Link className="brand" href="/" title="PondFish Home">
             <span className="mark">
               <Icon name="fish" />
             </span>
             PondFish
           </Link>
-          <nav>
+
+          <nav className="desktop-nav">
             <a href="#catch">Today's Fish</a>
             <a href="#how">How It Works</a>
             <a href="#plans">Subscription Plans</a>
             <a href="#app">Mobile App</a>
             <a href="#contact">Contact</a>
           </nav>
-          <div className="acts">
+
+          <div className="acts desktop-acts">
             <Link href="/customer/dashboard" className="btn ghost sm">
               Customer Portal
             </Link>
@@ -56,7 +59,35 @@ export default function LandingPage() {
               Reserve Fish
             </Link>
           </div>
+
+          {/* MOBILE HAMBURGER TOGGLE */}
+          <button
+            className="mobile-toggle icon-btn"
+            onClick={() => setMobileNavOpen((prev) => !prev)}
+            aria-label="Toggle navigation"
+          >
+            <Icon name={mobileNavOpen ? 'x' : 'menu'} />
+          </button>
         </div>
+
+        {/* MOBILE SLIDE-DOWN MENU */}
+        {mobileNavOpen && (
+          <div className="mobile-menu">
+            <a href="#catch" onClick={() => setMobileNavOpen(false)}>Today's Fish</a>
+            <a href="#how" onClick={() => setMobileNavOpen(false)}>How It Works</a>
+            <a href="#plans" onClick={() => setMobileNavOpen(false)}>Subscription Plans</a>
+            <a href="#app" onClick={() => setMobileNavOpen(false)}>Mobile App</a>
+            <a href="#contact" onClick={() => setMobileNavOpen(false)}>Contact</a>
+            <div className="mobile-acts">
+              <Link href="/customer/dashboard" className="btn ghost sm block" onClick={() => setMobileNavOpen(false)}>
+                Customer Portal
+              </Link>
+              <Link href="/customer/market" className="btn sm block" onClick={() => setMobileNavOpen(false)}>
+                Reserve Fish
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* TICKER BAND */}
@@ -103,11 +134,11 @@ export default function LandingPage() {
             </div>
             <div>
               <b>45 min</b>
-              <span>Average Farm-to-Store Delivery</span>
+              <span>Average Delivery Time</span>
             </div>
             <div>
               <b>4.9 ★</b>
-              <span>Customer Rating ( Hyderabad )</span>
+              <span>Rating in Hyderabad</span>
             </div>
           </div>
         </div>
@@ -405,7 +436,7 @@ export default function LandingPage() {
                 </span>
                 PondFish
               </Link>
-              <p style={{ fontSize: 13, lineHeight: 1.6, color: '#93AFA7' }}>
+              <p style={{ fontSize: 13, lineHeight: 1.6, color: '#A4C2FC' }}>
                 Organic fresh fish retail ecosystem connecting organic ponds directly to Hyderabad households with live GPS visibility.
               </p>
             </div>

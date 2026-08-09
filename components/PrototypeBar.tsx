@@ -15,7 +15,7 @@ export const PrototypeBar: React.FC = () => {
   return (
     <div id="pbar">
       <Link href="/" className="pb-logo" title="Go to main webpage">
-        ◤ <b>PONDFISH</b>&nbsp;PROTOTYPE
+        ◤ <b>PondFish</b>
       </Link>
       <nav>
         <Link href="/" className={isLanding ? 'on' : ''}>
@@ -31,7 +31,7 @@ export const PrototypeBar: React.FC = () => {
           Admin
         </Link>
       </nav>
-      <span className="pb-note">v1.0 · SProjectX · demo data</span>
+      <span className="pb-note">v1.0 · SProjectX</span>
     </div>
   );
 };
