@@ -42,7 +42,7 @@ export default function AdminInventoryPage() {
 
   return (
     <div>
-      <div className="sec-head" style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <div className="sec-head" style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h2>Fish Inventory & Stock Control</h2>
           <p>Real-time weight stock modifiers, price controls, and species catalog management.</p>

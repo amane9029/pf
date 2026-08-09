@@ -18,7 +18,7 @@ export default function AdminCustomersPage() {
         <p>Registered customer directory, membership plans, total spending, and location telemetry.</p>
       </div>
 
-      <div className="card" style={{ overflow: 'hidden' }}>
+      <div className="card tbl-wrap">
         <table className="tbl">
           <thead>
             <tr>

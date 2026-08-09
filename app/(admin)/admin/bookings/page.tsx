@@ -30,7 +30,7 @@ export default function AdminBookingsPage() {
         </div>
       </div>
 
-      <div className="card" style={{ overflow: 'hidden' }}>
+      <div className="card tbl-wrap">
         <table className="tbl">
           <thead>
             <tr>

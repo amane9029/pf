@@ -18,7 +18,7 @@ export default function AdminAuditLogsPage() {
         <p>Immutable audit trail of user bookings, inventory changes, payments, and worker fulfillments.</p>
       </div>
 
-      <div className="card" style={{ overflow: 'hidden' }}>
+      <div className="card tbl-wrap">
         <table className="tbl">
           <thead>
             <tr>
