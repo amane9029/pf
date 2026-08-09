@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PondFish — Digital Ecosystem Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:wght@400..600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F2EA; --card:#FFFFFF; --ink:#14312B; --ink2:#45605A; --mut:#84928B;
+  --teal:#0C6B5D; --teal-d:#0A5347; --teal-x:#E2EFEA;
+  --coral:#E85D3A; --coral-x:#FBE9E2;
+  --amber:#B57514; --amber-x:#F9EED8;
+  --ok:#2E7D4F; --ok-x:#E3F1E7;
+  --line:#E4DECE; --line2:#D3CBB5;
+  --disp:'Fraunces',serif; --body:'Instrument Sans',sans-serif; --mono:'Spline Sans Mono',monospace;
+  --sh:0 1px 2px rgba(20,49,43,.05),0 12px 32px -20px rgba(20,49,43,.4);
+  --r:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+img,svg{display:block}
+.ic{width:18px;height:18px;flex:none}
+.mono{font-family:var(--mono);font-size:.94em}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+.hidden{display:none!important}
+em{font-style:italic;color:var(--teal)}
+::selection{background:var(--teal);color:#fff}
+
+/* ---------- proto bar ---------- */
+#pbar{position:sticky;top:0;z-index:200;height:42px;background:var(--ink);color:#CBE0DA;display:flex;align-items:center;gap:18px;padding:0 16px;font-family:var(--mono);font-size:12px}
+#pbar .pb-logo{font-weight:600;letter-spacing:.08em;color:#fff;display:flex;gap:8px;align-items:center}
+#pbar .pb-logo b{color:#7FD6C4}
+#pbar nav{display:flex;gap:2px;margin-left:auto}
+#pbar nav button{background:none;border:0;color:#9DB8B0;font:600 12px var(--mono);letter-spacing:.04em;padding:6px 12px;border-radius:6px;transition:.15s}
+#pbar nav button:hover{color:#fff}
+#pbar nav button.on{background:#25453D;color:#fff}
+#pbar .pb-note{color:#5E7A72}
+@media(max-width:760px){#pbar .pb-note{display:none}}
+
+/* ---------- buttons / chips / tags ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;background:var(--teal);color:#fff;font:600 14px var(--body);padding:11px 18px;border-radius:9px;transition:.18s;text-decoration:none}
+.btn:hover{background:var(--teal-d);transform:translateY(-1px);box-shadow:0 6px 16px -8px rgba(12,107,93,.5)}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:transparent;border-color:var(--line2);color:var(--ink)}
+.btn.ghost:hover{border-color:var(--teal);color:var(--teal);background:#fff;box-shadow:none}
+.btn.coral{background:var(--coral)}
+.btn.coral:hover{background:#D14E2C;box-shadow:0 6px 16px -8px rgba(232,93,58,.5)}
+.btn.dark{background:var(--ink)}
+.btn.dark:hover{background:#0B1F1B;box-shadow:none}
+.btn.sm{padding:8px 13px;font-size:13px;border-radius:8px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn.linky{background:none;border:0;color:var(--teal);font:600 13px var(--body);padding:0;display:inline-flex;gap:5px;align-items:center}
+.btn.linky:hover{text-decoration:underline;transform:none;box-shadow:none}
+.btn.okbtn{background:var(--ok)}
+.chip{padding:7px 14px;border-radius:99px;border:1px solid var(--line2);background:#fff;font:600 13px var(--body);color:var(--ink2);transition:.15s}
+.chip:hover{border-color:var(--teal);color:var(--teal)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tag{display:inline-flex;align-items:center;gap:6px;font:600 11px var(--body);padding:4px 9px;border-radius:6px;letter-spacing:.03em;white-space:nowrap}
+.tag.ok{background:var(--ok-x);color:var(--ok)}
+.tag.warn{background:var(--amber-x);color:var(--amber)}
+.tag.off{background:#ECE7D9;color:var(--mut)}
+.tag.coral{background:var(--coral-x);color:var(--coral)}
+.tag.teal{background:var(--teal-x);color:var(--teal)}
+.live{width:7px;height:7px;border-radius:50%;background:var(--coral);display:inline-block;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,93,58,.5)}50%{box-shadow:0 0 0 5px rgba(232,93,58,0)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.sec-label{font:600 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:flex;align-items:center;gap:10px}
+.sec-label::after{content:'';height:1px;width:44px;background:var(--teal);opacity:.4}
+input[type=text],input[type=tel],input[type=number],input[type=email],select,textarea{width:100%;border:1px solid var(--line2);border-radius:9px;padding:11px 13px;font:500 14px var(--body);background:#fff;color:var(--ink);outline:none;transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(12,107,93,.13)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font:600 11px var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--ink2)}
+.meter{height:7px;background:#ECE7D9;border-radius:99px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--teal);border-radius:99px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.meter.coral i{background:var(--coral)}
+.sw{width:42px;height:24px;border-radius:99px;background:#D8D2C0;position:relative;transition:.2s;cursor:pointer;flex:none;border:0}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw.on{background:var(--teal)}
+.sw.on::after{left:21px}
+.spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{text-align:left;font:600 10.5px var(--body);text-transform:uppercase;letter-spacing:.07em;color:var(--mut);padding:10px 12px;border-bottom:1px solid var(--line)}
+.tbl td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tbody tr{transition:.12s}
+.tbl tbody tr:hover{background:#FAF7EF}
+
+/* ---------- toast / modal ---------- */
+#toast{position:fixed;bottom:26px;left:50%;transform:translate(-50%,80px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;display:flex;gap:10px;align-items:center;font:600 13.5px var(--body);z-index:400;transition:.35s cubic-bezier(.2,.8,.2,1);opacity:0;box-shadow:0 14px 40px -12px rgba(0,0,0,.5);max-width:92vw}
+#toast.show{transform:translate(-50%,0);opacity:1}
+#toast .ic{color:#7FD6C4}
+.ov{position:fixed;inset:0;background:rgba(14,32,28,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.ovcard{background:#fff;border-radius:16px;width:440px;max-width:100%;max-height:90vh;overflow:auto;animation:pop .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes pop{from{transform:translateY(18px) scale(.97);opacity:0}}
+.sheet{position:fixed;top:42px;right:0;bottom:0;width:420px;max-width:94vw;background:#fff;border-left:1px solid var(--line);z-index:250;transform:translateX(106%);transition:.32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;box-shadow:-24px 0 60px rgba(20,49,43,.18)}
+.sheet.open{transform:none}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line)}
+.sheet-b{padding:22px;overflow:auto;flex:1}
+.sheet-f{padding:16px 22px;border-top:1px solid var(--line)}
+
+/* ================= LANDING ================= */
+.lnd-head{position:sticky;top:42px;z-index:100;background:rgba(245,242,234,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.lnd-nav{display:flex;align-items:center;gap:26px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font:700 21px var(--disp);color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.brand .mark{width:32px;height:32px;background:var(--teal);border-radius:9px;display:grid;place-items:center;color:#fff}
+.lnd-nav nav{display:flex;gap:22px;margin-left:auto}
+.lnd-nav nav a{color:var(--ink2);text-decoration:none;font-weight:600;font-size:13.5px;transition:.15s}
+.lnd-nav nav a:hover{color:var(--teal)}
+.lnd-nav .acts{display:flex;gap:10px}
+@media(max-width:900px){.lnd-nav nav{display:none}}
+.ticker{background:var(--ink);color:#B9D6CE;overflow:hidden;border-bottom:3px solid var(--coral)}
+.ticker-track{display:flex;gap:0;width:max-content;animation:mq 32s linear infinite;font:500 12px var(--mono);letter-spacing:.06em;padding:9px 0}
+.ticker-track span{padding:0 22px;display:flex;align-items:center;gap:22px;white-space:nowrap}
+.ticker-track b{color:#fff;font-weight:600}
+.ticker-track i{color:var(--coral);font-style:normal}
+@keyframes mq{to{transform:translateX(-50%)}}
+.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:56px;padding-top:64px;padding-bottom:72px;align-items:center}
+.eyebrow{font:600 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--coral);margin-bottom:18px}
+.hero h1{font:600 clamp(38px,4.6vw,58px)/1.06 var(--disp);letter-spacing:-.015em;margin-bottom:20px}
+.hero .lede{font-size:16.5px;color:var(--ink2);max-width:480px;margin-bottom:28px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:34px}
+.hero-stats{display:flex;gap:0;border-top:1px solid var(--line2);padding-top:20px}
+.hero-stats div{padding-right:26px;margin-right:26px;border-right:1px solid var(--line2)}
+.hero-stats div:last-child{border:0}
+.hero-stats b{font:600 20px var(--disp);display:block}
+.hero-stats span{font-size:12px;color:var(--mut);letter-spacing:.03em}
+.hero-r{display:grid;gap:16px}
+.hero-r .card{padding:20px;transition:.3s}
+.tilt1{transform:rotate(-1.3deg)}
+.tilt2{transform:rotate(1.1deg);margin-left:30px}
+.hero-r .card:hover{transform:rotate(0)}
+.ht-top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.ht-top b{font-size:14.5px}
+.ht-top .eta{margin-left:auto;font-weight:600;color:var(--coral)}
+.route{position:relative;padding:14px 4px 0}
+.route-line{height:4px;background:#E9E3D2;border-radius:99px;position:relative}
+.route-line i{position:absolute;left:0;top:0;bottom:0;background:var(--teal);border-radius:99px;transition:width 1s}
+.route-truck{position:absolute;top:-15px;transform:translateX(-50%);color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:3px 5px;box-shadow:var(--sh);transition:left 1s}
+.route-stops{display:flex;justify-content:space-between;margin-top:10px;font:500 10.5px var(--mono);color:var(--mut);letter-spacing:.02em}
+.route-stops .now{color:var(--coral);font-weight:600}
+.ht-loc{font-size:12.5px;color:var(--ink2);margin-top:14px}
+.arr-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.arr-row:last-child{border:0}
+.arr-row .ic{color:var(--ok)}
+.arr-row b{font-weight:600}
+.arr-row span{margin-left:auto;color:var(--ink2);font-family:var(--mono);font-size:12px}
+.sec-head{margin-bottom:34px;max-width:560px}
+.sec-head h2{font:600 clamp(28px,3.2vw,40px)/1.12 var(--disp);letter-spacing:-.01em;margin:12px 0 10px}
+.sec-head p{color:var(--ink2)}
+section.blk{padding:76px 0}
+.fish-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+.fcard{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:.22s;cursor:pointer;position:relative}
+.fcard:hover{transform:translateY(-4px);box-shadow:0 20px 40px -22px rgba(20,49,43,.4);border-color:var(--line2)}
+.fcard .fart-wrap{background:linear-gradient(180deg,#F2F6F1,#E8EFE7);padding:18px 18px 8px;position:relative}
+.fcard .ftag{position:absolute;top:12px;left:12px}
+.fcard .fbody{padding:14px 16px 16px}
+.fcard h4{font:600 17px var(--disp);margin-bottom:2px}
+.fcard .fcat{font-size:12px;color:var(--mut);margin-bottom:10px}
+.fcard .frow{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding-top:10px}
+.fcard .fprice{font:600 15px var(--mono)}
+.fcard .fprice small{font:500 11px var(--body);color:var(--mut)}
+.fart{width:100%;height:auto}
+.how{background:var(--ink);color:#DCE9E4}
+.how .sec-label{color:#7FD6C4}
+.how .sec-label::after{background:#7FD6C4}
+.how h2{color:#fff;font:600 clamp(28px,3.2vw,40px)/1.12 var(--disp);margin:12px 0 44px}
+.steps{list-style:none;display:grid;grid-template-columns:repeat(6,1fr);gap:14px;position:relative}
+.steps::before{content:'';position:absolute;top:21px;left:4%;right:4%;border-top:2px dashed rgba(127,214,196,.3)}
+.steps li{position:relative;padding-top:56px}
+.steps b{position:absolute;top:0;left:0;width:44px;height:44px;background:#1E423B;border:1px solid rgba(127,214,196,.35);border-radius:12px;display:grid;place-items:center;font:italic 600 16px var(--disp);color:#7FD6C4}
+.steps h4{font:600 14.5px var(--body);color:#fff;margin-bottom:5px}
+.steps p{font-size:12.5px;color:#93AFA7;line-height:1.5}
+@media(max-width:960px){.steps{grid-template-columns:repeat(3,1fr)}.steps::before{display:none}}
+@media(max-width:600px){.steps{grid-template-columns:repeat(2,1fr)}}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:880px}
+.plan{border-radius:16px;padding:30px;border:1px solid var(--line);background:#fff;transition:.22s;position:relative}
+.plan:hover{transform:translateY(-4px);box-shadow:var(--sh)}
+.plan.hot{background:var(--ink);color:#DCE9E4;border-color:var(--ink)}
+.plan.hot .plan-price,.plan.hot h3{color:#fff}
+.plan .pl-tag{position:absolute;top:-11px;right:22px;background:var(--coral);color:#fff;font:600 11px var(--body);padding:4px 11px;border-radius:99px;letter-spacing:.04em}
+.plan h3{font:600 22px var(--disp);margin-bottom:4px}
+.plan .plan-for{font-size:13px;color:var(--ink2);margin-bottom:18px}
+.plan.hot .plan-for{color:#93AFA7}
+.plan-price{font:600 40px var(--disp);margin-bottom:2px}
+.plan-price small{font:500 14px var(--body);color:var(--mut)}
+.plan ul{list-style:none;margin:20px 0 24px;display:grid;gap:9px;font-size:13.5px}
+.plan ul li{display:flex;gap:9px;align-items:center}
+.plan ul .ic{color:var(--teal);width:16px;height:16px}
+.plan.hot ul .ic{color:#7FD6C4}
+.plan-note{font-size:13px;color:var(--ink2);margin-top:18px;max-width:880px;border-left:3px solid var(--coral);padding-left:14px}
+@media(max-width:760px){.plans{grid-template-columns:1fr}}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 44px}
+.why-item{display:flex;gap:16px;padding:20px 4px;border-bottom:1px solid var(--line)}
+.wi-ic{width:42px;height:42px;flex:none;border-radius:11px;background:var(--teal-x);color:var(--teal);display:grid;place-items:center}
+.why-item:nth-child(even) .wi-ic{background:var(--coral-x);color:var(--coral)}
+.why-item h4{font:600 15.5px var(--body);margin-bottom:3px}
+.why-item p{font-size:13px;color:var(--ink2)}
+@media(max-width:760px){.why-grid{grid-template-columns:1fr}}
+.appband{background:var(--teal);color:#EAF4F0;overflow:hidden}
+.app-in{display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:center;padding:70px 24px}
+.appband .sec-label{color:#A9E3D3}
+.appband .sec-label::after{background:#A9E3D3}
+.appband h2{font:600 clamp(28px,3.2vw,40px)/1.12 var(--disp);color:#fff;margin:12px 0 14px}
+.appband p{color:#C4E2D9;max-width:460px;margin-bottom:26px}
+.store-btns{display:flex;gap:12px;flex-wrap:wrap}
+.store-btn{display:flex;align-items:center;gap:10px;background:#0A4A40;border:1px solid rgba(255,255,255,.18);color:#fff;padding:11px 18px;border-radius:11px;text-decoration:none;transition:.18s}
+.store-btn:hover{transform:translateY(-2px);background:#083D35}
+.store-btn small{display:block;font-size:10px;opacity:.7;line-height:1.2;text-align:left}
+.store-btn b{font-size:14px;line-height:1.2}
+.phone{width:230px;margin:0 auto;background:#0A2E28;border-radius:34px;padding:12px;border:1px solid rgba(255,255,255,.15);box-shadow:0 30px 60px -20px rgba(0,0,0,.5);transform:rotate(2.5deg)}
+.phone-sc{background:var(--paper);border-radius:24px;padding:20px 16px;text-align:center;color:var(--ink)}
+.phone-sc .notch{width:70px;height:6px;background:#0A2E28;border-radius:99px;margin:0 auto 16px}
+.phone-sc canvas{margin:10px auto;border:6px solid #fff;border-radius:8px;box-shadow:var(--sh)}
+.phone-sc p{font:600 12px var(--body);color:var(--ink2)}
+@media(max-width:820px){.app-in{grid-template-columns:1fr}.phone{display:none}}
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.cinfo{padding:28px}
+.cinfo h3{font:600 22px var(--disp);margin-bottom:18px}
+.ci-row{display:flex;gap:13px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:14px;align-items:flex-start}
+.ci-row:last-child{border:0}
+.ci-row .ic{color:var(--teal);margin-top:2px}
+.ci-row small{display:block;color:var(--mut);font-size:12px}
+.cform{padding:28px;display:flex;flex-direction:column;gap:14px}
+.cform h3{font:600 22px var(--disp)}
+@media(max-width:820px){.contact{grid-template-columns:1fr}}
+footer{background:var(--ink);color:#93AFA7;padding:56px 0 26px;margin-top:0}
+.f-in{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:34px;padding-bottom:38px;border-bottom:1px solid #23433C}
+footer .brand{color:#fff;margin-bottom:12px}
+footer h5{color:#fff;font:600 12px var(--body);letter-spacing:.09em;text-transform:uppercase;margin-bottom:14px}
+footer a{display:block;color:#93AFA7;text-decoration:none;font-size:13.5px;padding:4px 0;transition:.15s}
+footer a:hover{color:#7FD6C4}
+.f-bottom{display:flex;justify-content:space-between;padding-top:22px;font:500 12px var(--mono);flex-wrap:wrap;gap:8px}
+@media(max-width:820px){.f-in{grid-template-columns:1fr 1fr}}
+.rev{opacity:0;transform:translateY(24px);transition:.7s cubic-bezier(.2,.8,.2,1)}
+.rev.in{opacity:1;transform:none}
+@media(max-width:900px){.hero{grid-template-columns:1fr;gap:40px;padding-top:44px}}
+
+/* ================= CUSTOMER ================= */
+.cauth{min-height:calc(100vh - 42px);display:flex;align-items:center;justify-content:center;padding:40px 20px}
+.cauth-card{display:grid;grid-template-columns:1.05fr .95fr;width:920px;max-width:100%;overflow:hidden;border-radius:18px}
+.ca-form{background:#fff;padding:44px 42px}
+.ca-side{background:var(--ink);color:#C9DED8;padding:44px 38px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.ca-side::after{content:'';position:absolute;right:-70px;bottom:-70px;width:230px;height:230px;border-radius:50%;border:26px solid rgba(127,214,196,.12)}
+.ca-side h3{font:600 26px var(--disp);color:#fff;margin-bottom:14px;line-height:1.2}
+.ca-side ul{list-style:none;display:grid;gap:11px;font-size:13.5px}
+.ca-side ul li{display:flex;gap:9px;align-items:center}
+.ca-side ul .ic{color:#7FD6C4;width:16px;height:16px}
+.ca-form h2{font:600 30px var(--disp);margin:16px 0 6px}
+.ca-form .sub{color:var(--ink2);font-size:14px;margin-bottom:26px}
+.otp-row{display:flex;gap:12px;justify-content:center;margin:22px 0}
+.otp-row input{width:56px;height:62px;text-align:center;font:600 24px var(--mono);padding:0}
+.otp-hint{text-align:center;font-size:12.5px;color:var(--mut);margin-bottom:18px}
+.otp-hint b{color:var(--coral);font-family:var(--mono)}
+.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.stepbar{display:flex;gap:6px;margin-bottom:24px}
+.stepbar i{height:4px;flex:1;background:#ECE7D9;border-radius:99px}
+.stepbar i.on{background:var(--teal)}
+@media(max-width:800px){.cauth-card{grid-template-columns:1fr}.ca-side{display:none}.ca-form{padding:34px 26px}}
+.capp{display:flex;min-height:calc(100vh - 42px)}
+.cnav{width:224px;flex:none;background:#fff;border-right:1px solid var(--line);padding:20px 12px;position:sticky;top:42px;height:calc(100vh - 42px);overflow:auto;display:flex;flex-direction:column}
+.cn-brand{display:flex;gap:9px;align-items:center;font:700 17px var(--disp);padding:4px 12px 18px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.cn-brand .mark{width:28px;height:28px;background:var(--teal);border-radius:8px;display:grid;place-items:center;color:#fff}
+.cn-lab{font:600 10px var(--body);letter-spacing:.12em;color:var(--mut);text-transform:uppercase;padding:12px 12px 6px}
+.cn-it{display:flex;gap:11px;align-items:center;padding:10px 12px;border-radius:9px;color:var(--ink2);font:600 13.5px var(--body);border:0;background:none;width:100%;text-align:left;transition:.15s;margin-bottom:2px}
+.cn-it:hover{background:var(--teal-x);color:var(--teal)}
+.cn-it.on{background:var(--ink);color:#fff}
+.cn-it .bdg{margin-left:auto;background:var(--coral);color:#fff;font:600 10px var(--body);min-width:17px;height:17px;border-radius:99px;display:grid;place-items:center;padding:0 4px}
+.cn-it.on .bdg{background:#fff;color:var(--ink)}
+.cn-foot{margin-top:auto;padding:14px 12px 4px;border-top:1px solid var(--line);font-size:12px;color:var(--mut)}
+.cmain{flex:1;min-width:0;display:flex;flex-direction:column}
+.chead{display:flex;align-items:center;gap:14px;padding:14px 28px;border-bottom:1px solid var(--line);background:rgba(245,242,234,.9);backdrop-filter:blur(6px);position:sticky;top:42px;z-index:50}
+.chead h3{font:600 19px var(--disp)}
+.chead .crumb{font:500 11px var(--mono);color:var(--mut);letter-spacing:.06em}
+.chead .right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line2);background:#fff;display:grid;place-items:center;color:var(--ink2);position:relative;transition:.15s}
+.icon-btn:hover{border-color:var(--teal);color:var(--teal)}
+.icon-btn .ndot{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--coral);border:1.5px solid #fff}
+.avatar{width:38px;height:38px;border-radius:10px;background:var(--coral);color:#fff;display:grid;place-items:center;font:700 13px var(--body)}
+.cbody{padding:26px 28px 100px;max-width:1080px;width:100%;margin:0 auto}
+.view{display:none}
+.view.on{display:block;animation:vIn .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes vIn{from{opacity:0;transform:translateY(10px)}}
+.cbottom{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);z-index:150;padding:7px 8px calc(7px + env(safe-area-inset-bottom));justify-content:space-around}
+.cb-it{display:flex;flex-direction:column;align-items:center;gap:3px;font:600 10px var(--body);color:var(--mut);background:none;border:0;padding:5px 12px;border-radius:9px}
+.cb-it.on{color:var(--teal)}
+@media(max-width:920px){.cnav{display:none}.cbottom{display:flex}.chead{padding:12px 16px}.cbody{padding:18px 16px 110px}}
+.hgrid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;margin-bottom:18px}
+.h-welcome{padding:24px}
+.hw-hi{font:600 26px var(--disp);margin-bottom:5px}
+.hw-sub{font-size:13.5px;color:var(--ink2);margin-bottom:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.h-truck{padding:20px}
+.hstats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:18px}
+.hs{padding:18px 20px}
+.hs span{font:600 11px var(--body);text-transform:uppercase;letter-spacing:.08em;color:var(--mut);display:block;margin-bottom:8px}
+.hs b{font:600 24px var(--disp);display:block}
+.hs small{font-size:12px;color:var(--mut);display:block;margin-top:7px}
+.hs .meter{margin-top:10px}
+.hs.warn b{color:var(--coral)}
+.hgrid2{display:grid;grid-template-columns:1.6fr 1fr;gap:18px}
+.h-fish{padding:20px}
+.h-fish header,.h-notif header,.h-book header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.h-fish header b,.h-notif header b,.h-book header b{font:600 15.5px var(--disp)}
+.hf-row{display:grid;gap:10px}
+.hf-it{display:flex;align-items:center;gap:13px;padding:10px;border:1px solid var(--line);border-radius:10px;transition:.15s;cursor:pointer;background:#fff}
+.hf-it:hover{border-color:var(--teal);transform:translateX(3px)}
+.hf-it .thumb{width:56px;height:42px;background:#EDF3ED;border-radius:8px;overflow:hidden;flex:none;display:grid;place-items:center}
+.hf-it .thumb svg{width:52px}
+.hf-it b{font-size:14px;display:block}
+.hf-it small{color:var(--mut);font-size:12px}
+.hf-it .pr{margin-left:auto;font:600 13.5px var(--mono)}
+.h-side{display:grid;gap:18px;align-content:start}
+.h-book,.h-notif{padding:20px}
+.hb-body{display:flex;gap:14px;align-items:center}
+.hb-body .qrmini{width:64px;height:64px;border:1px solid var(--line);border-radius:8px;padding:5px;background:#fff}
+.nt-it{display:flex;gap:11px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13px;align-items:flex-start}
+.nt-it:last-child{border:0;padding-bottom:0}
+.nt-it .ic{color:var(--teal);margin-top:1px}
+.nt-it small{display:block;color:var(--mut);font-size:11.5px;margin-top:2px}
+.nt-it.unread b::after{content:'';display:inline-block;width:6px;height:6px;background:var(--coral);border-radius:50%;margin-left:6px;vertical-align:2px}
+@media(max-width:920px){.hgrid,.hgrid2{grid-template-columns:1fr}.hstats{grid-template-columns:1fr}}
+.mkt-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:20px}
+.mkt-bar .search{position:relative;flex:1;min-width:220px}
+.mkt-bar .search .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mut)}
+.mkt-bar .search input{padding-left:38px}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap}
+.empty{text-align:center;padding:56px 20px;color:var(--mut)}
+.empty .ic{width:34px;height:34px;margin:0 auto 12px;color:var(--line2)}
+.dtl{display:grid;grid-template-columns:1fr 1.1fr;gap:26px;align-items:start}
+.dtl-art{background:linear-gradient(180deg,#F2F6F1,#E6EEE5);border:1px solid var(--line);border-radius:16px;padding:34px;position:relative}
+.dtl-art .ftag{position:absolute;top:16px;left:16px}
+.dtl-info h2{font:600 32px var(--disp);margin:6px 0 2px}
+.dtl-price{font:600 26px var(--mono);margin:14px 0}
+.dtl-price small{font:500 13px var(--body);color:var(--mut)}
+.info-rows{display:grid;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:18px 0;background:#fff}
+.info-rows div{display:flex;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);font-size:13.5px}
+.info-rows div:last-child{border:0}
+.info-rows span{color:var(--mut)}
+.info-rows b{font-weight:600;text-align:right}
+.subbox{background:var(--teal-x);border:1px solid #C6DED5;border-radius:12px;padding:16px 18px;margin:18px 0}
+.subbox h5{font:600 13px var(--body);color:var(--teal);display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.subbox .sb-row{display:flex;justify-content:space-between;font-size:13.5px;padding:3px 0}
+.subbox .sb-row b{font-family:var(--mono);font-weight:600}
+.note-line{font-size:12.5px;color:var(--amber);background:var(--amber-x);border-radius:9px;padding:10px 14px;display:flex;gap:8px;align-items:flex-start;margin-bottom:18px}
+@media(max-width:860px){.dtl{grid-template-columns:1fr}}
+.bk{max-width:640px;margin:0 auto;display:grid;gap:18px}
+.bk-fish{display:flex;gap:16px;align-items:center;padding:18px}
+.bk-fish .thumb{width:86px;height:64px;background:#EDF3ED;border-radius:10px;display:grid;place-items:center;flex:none}
+.bk-fish .thumb svg{width:76px}
+.qty-card{padding:22px}
+.stepper{display:flex;align-items:center;gap:16px;justify-content:center;margin:14px 0 4px}
+.stepper button{width:46px;height:46px;border-radius:12px;border:1px solid var(--line2);background:#fff;font-size:20px;color:var(--teal);transition:.15s;display:grid;place-items:center}
+.stepper button:hover{border-color:var(--teal);background:var(--teal-x)}
+.stepper .qv{font:600 30px var(--disp);min-width:110px;text-align:center}
+.stepper .qv small{font:500 14px var(--body);color:var(--mut)}
+.sum-card{padding:6px 22px}
+.sum-row{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.sum-row:last-child{border:0}
+.sum-row span{color:var(--ink2)}
+.sum-row b{font-family:var(--mono);font-weight:600}
+.sum-row.tot b{font-size:18px;color:var(--teal)}
+.sum-row.tot.pay b{color:var(--coral)}
+.ck-terms{display:grid;gap:10px;padding:18px 22px}
+.ck{display:flex;gap:10px;font-size:13.5px;color:var(--ink2);cursor:pointer;align-items:flex-start}
+.ck input{margin-top:2px;accent-color:var(--teal);width:16px;height:16px}
+.ticket-wrap{max-width:440px;margin:0 auto}
+.succ{text-align:center;margin-bottom:20px}
+.succ .okc{width:56px;height:56px;border-radius:50%;background:var(--ok-x);color:var(--ok);display:grid;place-items:center;margin:0 auto 12px}
+.succ .okc .ic{width:26px;height:26px}
+.succ h2{font:600 26px var(--disp)}
+.succ p{color:var(--ink2);font-size:14px}
+.ticket{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:var(--sh)}
+.t-qr{display:grid;place-items:center;padding:10px 0 18px}
+.t-qr canvas{border:8px solid #fff;outline:1px solid var(--line);border-radius:10px}
+.t-id{text-align:center;font:600 14px var(--mono);letter-spacing:.05em;margin-bottom:6px}
+.t-live{text-align:center;font-size:11.5px;color:var(--mut);display:flex;gap:6px;align-items:center;justify-content:center}
+.perf{border-top:2px dashed var(--line2);margin:20px -26px;position:relative}
+.perf::before,.perf::after{content:'';position:absolute;top:-12px;width:24px;height:24px;border-radius:50%;background:var(--paper);border:1px solid var(--line)}
+.perf::before{left:-13px}.perf::after{right:-13px}
+.t-instr{background:#FAF7EF;border-radius:10px;padding:13px 15px;font-size:12.5px;color:var(--ink2);display:flex;gap:9px;margin-top:16px}
+.t-instr .ic{color:var(--coral);flex:none;margin-top:1px}
+.sub-health{display:flex;align-items:center;gap:10px;padding:14px 18px;border-radius:12px;margin-bottom:18px;font-weight:600;font-size:14px}
+.sub-health.g{background:var(--ok-x);color:var(--ok)}
+.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.sg-card{padding:22px}
+.sg-card h5{font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+.sg-card .big{font:600 30px var(--disp)}
+.sg-card .big small{font:500 14px var(--body);color:var(--mut)}
+.plan-mini{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:#fff;margin-bottom:12px;gap:12px;flex-wrap:wrap}
+.plan-mini h4{font:600 17px var(--disp)}
+.plan-mini small{color:var(--mut);display:block;font-size:12.5px}
+.hist-row{border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:12px;overflow:hidden;transition:.15s}
+.hist-top{display:flex;align-items:center;gap:14px;padding:15px 18px;cursor:pointer;width:100%;background:none;border:0;text-align:left;font-family:inherit;color:inherit}
+.hist-top:hover{background:#FAF7EF}
+.hist-top .mono{color:var(--mut);font-size:12px}
+.hist-top b{font-size:14.5px}
+.hist-top .rt{margin-left:auto;text-align:right;display:flex;gap:12px;align-items:center}
+.hist-det{display:none;padding:0 18px 18px;border-top:1px dashed var(--line)}
+.hist-row.open .hist-det{display:block;animation:vIn .25s}
+.hd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;padding-top:16px}
+.hd-grid div span{font:600 10.5px var(--body);text-transform:uppercase;letter-spacing:.07em;color:var(--mut);display:block;margin-bottom:4px}
+.hd-grid div b{font-size:13.5px;font-weight:600}
+.notif-list{display:grid;gap:10px}
+.nf-it{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 18px;align-items:flex-start;transition:.15s}
+.nf-it:hover{border-color:var(--line2)}
+.nf-it .nf-ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--teal-x);color:var(--teal)}
+.nf-it.coral .nf-ic{background:var(--coral-x);color:var(--coral)}
+.nf-it.amber .nf-ic{background:var(--amber-x);color:var(--amber)}
+.nf-it b{font-size:14px;display:block}
+.nf-it p{font-size:13px;color:var(--ink2)}
+.nf-it small{color:var(--mut);font-size:11.5px;display:block;margin-top:3px}
+.nf-it .udot{width:8px;height:8px;background:var(--coral);border-radius:50%;flex:none;margin-top:6px}
+.prof-head{padding:26px;display:flex;gap:18px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.prof-head .avatar{width:64px;height:64px;border-radius:16px;font-size:21px;background:var(--teal)}
+.prof-head h2{font:600 26px var(--disp)}
+.prof-head .pid{font:500 12px var(--mono);color:var(--mut)}
+.badge-m{display:inline-flex;gap:7px;align-items:center;background:var(--teal-x);color:var(--teal);font:600 12px var(--body);padding:6px 12px;border-radius:99px;margin-top:8px}
+.p-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin-bottom:18px}
+.pg-card{padding:22px}
+.pg-card h5{font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:14px}
+.kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.kv:last-child{border:0}
+.kv span{color:var(--mut)}
+.kv b{font-weight:600}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:18px}
+.stat{padding:18px;text-align:center}
+.stat b{font:600 26px var(--disp);display:block}
+.stat span{font-size:12px;color:var(--mut)}
+@media(max-width:820px){.p-grid{grid-template-columns:1fr}.stat-row{grid-template-columns:repeat(2,1fr)}.sub-grid{grid-template-columns:1fr}}
+.set-group{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.set-group h5{font:600 12px var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--mut);padding:14px 20px;border-bottom:1px solid var(--line);background:#FAF7EF}
+.set-row{display:flex;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--line);font-size:14px}
+.set-row:last-child{border:0}
+.set-row small{display:block;color:var(--mut);font-size:12px}
+.set-row .sw{margin-left:auto}
+.set-row .val{margin-left:auto;color:var(--mut);font-size:13px}
+
+/* ================= WORKER ================= */
+#pt-worker{min-height:calc(100vh - 42px);background:var(--paper)}
+.wtop{background:var(--ink);color:#fff;padding:0 24px}
+.wtop-in{max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.wbrand{display:flex;gap:10px;align-items:center;padding:16px 0;font:700 17px var(--disp)}
+.wbrand .mark{width:28px;height:28px;background:var(--teal);border-radius:8px;display:grid;place-items:center}
+.wstore{font:500 11px var(--mono);color:#7FD6C4;letter-spacing:.06em;border:1px solid #2C5148;padding:5px 11px;border-radius:99px}
+.wtabs{margin-left:auto;display:flex;gap:4px}
+.wtabs button{background:none;border:0;color:#8FACA4;font:600 13px var(--body);padding:20px 14px 16px;border-bottom:3px solid transparent;transition:.15s}
+.wtabs button:hover{color:#fff}
+.wtabs button.on{color:#fff;border-color:var(--coral)}
+.wbody{max-width:1000px;margin:0 auto;padding:26px 24px 60px}
+.wstats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.wstat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 20px}
+.wstat span{font:600 10.5px var(--body);text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+.wstat b{font:600 30px var(--disp);display:block;line-height:1.15}
+.wstat.hl b{color:var(--coral)}
+.wtool{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.wtool .search{position:relative;flex:1;min-width:230px}
+.wtool .search .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mut)}
+.wtool .search input{padding-left:38px;height:48px}
+.scanbtn{height:48px;padding:0 22px;font-size:14.5px;gap:10px}
+.wrow{display:flex;align-items:center;gap:16px;width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin-bottom:10px;text-align:left;transition:.15s;color:var(--ink)}
+.wrow:hover{border-color:var(--teal);transform:translateX(3px)}
+.wrow .wid{font:600 12px var(--mono);color:var(--mut);display:block}
+.wrow b{font-size:14.5px}
+.wrow .wfish{margin-left:auto;text-align:right}
+.wrow .wfish b{display:block}
+.wrow .wfish span{font-size:12px;color:var(--mut)}
+.wrow .wt{font:500 12px var(--mono);color:var(--ink2);min-width:66px;text-align:right}
+.wrow .ic{color:var(--mut)}
+.kv2{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.kv2:last-child{border:0}
+.kv2 span{color:var(--mut)}
+.kv2 b{font-weight:600}
+.pay-ok{display:flex;gap:8px;align-items:center;background:var(--ok-x);color:var(--ok);font:600 13px var(--body);padding:11px 14px;border-radius:10px;margin:16px 0}
+.scan-vp{background:#0F2823;border-radius:12px;height:280px;position:relative;overflow:hidden;margin-bottom:16px}
+.scan-line{position:absolute;left:12%;right:12%;height:2px;background:#7FD6C4;box-shadow:0 0 18px #7FD6C4;animation:scan 1.8s ease-in-out infinite}
+@keyframes scan{0%,100%{top:14%}50%{top:84%}}
+.scan-corner{position:absolute;width:26px;height:26px;border:3px solid #7FD6C4}
+.sc-tl{top:14px;left:14px;border-right:0;border-bottom:0;border-radius:6px 0 0 0}
+.sc-tr{top:14px;right:14px;border-left:0;border-bottom:0;border-radius:0 6px 0 0}
+.sc-bl{bottom:14px;left:14px;border-right:0;border-top:0;border-radius:0 0 0 6px}
+.sc-br{bottom:14px;right:14px;border-left:0;border-top:0;border-radius:0 0 6px 0}
+.wprofile{max-width:560px}
+.wp-card{padding:24px;margin-bottom:16px}
+.wp-card h5{font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:12px}
+
+/* ================= ADMIN ================= */
+.alayout{display:flex;min-height:calc(100vh - 42px)}
+.anav{width:232px;flex:none;background:var(--ink);color:#9DB8B0;padding:18px 12px;position:sticky;top:42px;height:calc(100vh - 42px);overflow:auto}
+.an-brand{display:flex;gap:9px;align-items:center;color:#fff;font:700 17px var(--disp);padding:4px 12px 16px;border-bottom:1px solid #23433C;margin-bottom:12px}
+.an-brand .mark{width:28px;height:28px;background:var(--teal);border-radius:8px;display:grid;place-items:center;color:#fff}
+.an-lab{font:600 9.5px var(--body);letter-spacing:.14em;color:#54736B;text-transform:uppercase;padding:14px 12px 5px}
+.an-it{display:flex;gap:11px;align-items:center;padding:9px 12px;border-radius:8px;color:#9DB8B0;font:600 13px var(--body);border:0;background:none;width:100%;text-align:left;transition:.15s;margin-bottom:1px}
+.an-it:hover{background:#1C3A33;color:#fff}
+.an-it.on{background:var(--teal);color:#fff}
+.amain{flex:1;min-width:0}
+.ahead{display:flex;align-items:center;gap:14px;padding:15px 30px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:42px;z-index:50}
+.ahead h3{font:600 19px var(--disp)}
+.ahead .adate{margin-left:auto;font:500 12px var(--mono);color:var(--mut)}
+.achip{display:flex;gap:9px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:99px;padding:5px 14px 5px 6px;font:600 12.5px var(--body)}
+.achip .avatar{width:26px;height:26px;border-radius:50%;font-size:10px;background:var(--ink)}
+.abody{padding:26px 30px 80px;max-width:1200px}
+.aview{display:none}
+.aview.on{display:block;animation:vIn .3s}
+.a-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.ac{background:#fff;border:1px solid var(--line);border-radius:12px;padding:17px 19px;transition:.16s;cursor:pointer;text-align:left;font-family:inherit;color:inherit}
+.ac:hover{transform:translateY(-3px);box-shadow:var(--sh);border-color:var(--line2)}
+.ac span{font:600 10.5px var(--body);text-transform:uppercase;letter-spacing:.08em;color:var(--mut);display:flex;gap:7px;align-items:center}
+.ac span .ic{width:14px;height:14px;color:var(--teal)}
+.ac b{font:600 26px var(--disp);display:block;margin-top:7px;line-height:1.1}
+.ac small{font-size:11.5px;color:var(--mut)}
+.ac.hl{background:var(--ink);border-color:var(--ink)}
+.ac.hl span{color:#93AFA7}.ac.hl span .ic{color:#7FD6C4}.ac.hl b{color:#fff}
+.a-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-bottom:20px}
+.a-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px}
+.a-card>header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.a-card>header b{font:600 15.5px var(--disp)}
+.bars{display:flex;gap:9px;align-items:flex-end;height:150px}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:7px;height:100%}
+.bar i{display:block;height:var(--h);background:var(--teal);border-radius:5px 5px 2px 2px;transition:.25s;min-height:4px}
+.bar:hover i{background:var(--ink)}
+.bar.hot i{background:var(--coral)}
+.bar span{font:500 10px var(--mono);color:var(--mut);text-align:center}
+.alert-it{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border-radius:10px;margin-bottom:9px;font-size:13px;border:1px solid var(--line);cursor:pointer;transition:.15s;background:#fff;width:100%;text-align:left;font-family:inherit;color:inherit}
+.alert-it:hover{transform:translateX(3px);border-color:var(--line2)}
+.alert-it .ic{width:16px;height:16px;margin-top:1px}
+.alert-it.warn{border-left:3px solid var(--amber)}.alert-it.warn .ic{color:var(--amber)}
+.alert-it.info{border-left:3px solid var(--teal)}.alert-it.info .ic{color:var(--teal)}
+.alert-it small{display:block;color:var(--mut);font-size:11.5px}
+.qa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.qa{display:flex;gap:9px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:600 12.5px var(--body);color:var(--ink);transition:.15s}
+.qa:hover{border-color:var(--teal);color:var(--teal);transform:translateY(-2px)}
+.qa .ic{color:var(--teal);width:16px;height:16px}
+.feed-it{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13px;align-items:flex-start}
+.feed-it:last-child{border:0}
+.feed-it .fdot{width:8px;height:8px;border-radius:50%;background:var(--teal);margin-top:6px;flex:none}
+.feed-it.coral .fdot{background:var(--coral)}
+.feed-it small{display:block;color:var(--mut);font-size:11px;margin-top:1px}
+.inv-row{display:flex;align-items:center;gap:15px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin-bottom:10px;cursor:pointer;transition:.15s;width:100%;text-align:left;font-family:inherit;color:inherit}
+.inv-row:hover{border-color:var(--teal);transform:translateX(3px)}
+.inv-row .thumb{width:62px;height:44px;background:#EDF3ED;border-radius:8px;display:grid;place-items:center;flex:none}
+.inv-row .thumb svg{width:56px}
+.inv-row .nm b{display:block;font-size:14px}
+.inv-row .nm small{color:var(--mut);font-size:12px}
+.inv-row .stk{margin-left:auto;min-width:120px}
+.inv-row .stk small{font:600 12px var(--mono);display:block;margin-bottom:5px}
+.inv-row .rt{display:flex;gap:12px;align-items:center;min-width:130px;justify-content:flex-end}
+.truck-hero{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;margin-bottom:18px}
+.truck-map{background:#EDF3ED;border-radius:12px;padding:34px 26px 22px;margin:20px 0;position:relative;overflow:hidden}
+.truck-map::before{content:'';position:absolute;left:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:#E2ECE1}
+.truck-map::after{content:'';position:absolute;right:-60px;bottom:-60px;width:220px;height:220px;border-radius:50%;background:#E2ECE1}
+.truck-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.donut{width:130px;height:130px;border-radius:50%;background:conic-gradient(var(--teal) 0 68%,var(--coral) 68% 100%);position:relative;margin:0 auto}
+.donut::after{content:'';position:absolute;inset:26px;background:#fff;border-radius:50%}
+.donut b{position:absolute;inset:0;display:grid;place-items:center;font:600 19px var(--disp);z-index:1}
+.legend{display:grid;gap:8px;margin-top:16px;font-size:13px}
+.legend div{display:flex;gap:8px;align-items:center}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+@media(max-width:1060px){.a-cards{grid-template-columns:repeat(2,1fr)}.a-grid{grid-template-columns:1fr}.truck-grid{grid-template-columns:1fr}}
+@media(max-width:920px){
+  .anav{position:static;height:auto;width:100%;display:flex;overflow-x:auto;gap:4px;padding:10px 12px;align-items:center}
+  .anav .an-brand,.an-lab{display:none}
+  .an-it{width:auto;white-space:nowrap;padding:8px 12px}
+  .alayout{flex-direction:column}
+  .ahead{top:0;position:static}
+  .abody{padding:18px 16px 60px}
+}
+</style>
+</head>
+<body>
+
+<!-- ======= PROTOTYPE SWITCHER ======= -->
+<div id="pbar">
+  <span class="pb-logo">◤ <b>PONDFISH</b>&nbsp;PROTOTYPE</span>
+  <nav>
+    <button class="on" onclick="setPortal('landing')">Landing</button>
+    <button onclick="setPortal('customer')">Customer</button>
+    <button onclick="setPortal('worker')">Worker</button>
+    <button onclick="setPortal('admin')">Admin</button>
+  </nav>
+  <span class="pb-note">v1.0 · SProjectX · demo data</span>
+</div>
+
+<!-- ============================================================ -->
+<!-- ======================= LANDING ============================ -->
+<!-- ============================================================ -->
+<section class="portal" id="pt-landing">
+
+  <header class="lnd-head">
+    <div class="wrap lnd-nav">
+      <a class="brand" href="#top"><span class="mark" id="brandMark"></span>PondFish</a>
+      <nav>
+        <a href="#catch">Today's Fish</a>
+        <a href="#plans">Subscriptions</a>
+        <a href="#how">How it Works</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="acts">
+        <button class="btn ghost sm" onclick="goCustomer()">Login</button>
+        <button class="btn sm" onclick="toast('APK download starting… (demo)','arrow')">Download App</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="ticker"><div class="ticker-track" id="tickerTrack"></div></div>
+
+  <!-- HERO -->
+  <div class="wrap hero" id="top">
+    <div>
+      <p class="eyebrow">— Farm-fresh fish · Hyderabad</p>
+      <h1>Fish that was <em>swimming</em> yesterday, at your door today.</h1>
+      <p class="lede">PondFish sources live fish directly from certified organic farms, trucks them to our warehouse every morning, and lets you reserve your share before you leave home.</p>
+      <div class="hero-cta">
+        <a class="btn" href="#catch">View today's fish ↓</a>
+        <button class="btn ghost" onclick="toast('APK download starting… (demo)','arrow')">Get the mobile app</button>
+      </div>
+      <div class="hero-stats">
+        <div><b>06:00</b><span>DAILY TRUCK DISPATCH</span></div>
+        <div><b>100%</b><span>ORGANIC PONDS</span></div>
+        <div><b>~45 min</b><span>AVG. STORE PICKUP</span></div>
+      </div>
+    </div>
+    <div class="hero-r">
+      <div class="card tilt1">
+        <div class="ht-top"><span class="tag coral"><span class="live"></span>LIVE</span><b>Fresh fish delivery</b><span class="mono eta" data-eta>18 min</span></div>
+        <div class="route">
+          <div class="route-line"><i style="width:64%"></i><span class="route-truck" id="heroTruck" style="left:64%"></span></div>
+          <div class="route-stops"><span>FARM</span><span>WARANGAL HWY</span><span class="now">KUKATPALLY</span><span>STORE</span></div>
+        </div>
+        <p class="ht-loc">Currently near <b>Kukatpally</b> · Truck TS 09 AB 1234 · OneLap GPS</p>
+      </div>
+      <div class="card tilt2">
+        <div class="ht-top"><span class="tag ok">ARRIVED 07:40</span><b>First off the truck</b></div>
+        <div class="arr-row"><span class="ic-w"></span><b>Rohu</b><span>18 KG ✓</span></div>
+        <div class="arr-row"><b>Katla</b><span>12 KG ✓</span></div>
+        <div class="arr-row"><b>Tilapia</b><span>14 KG ✓</span></div>
+        <div class="arr-row"><b>Murrel</b><span style="color:var(--amber)">ON TRUCK · <span data-eta>18 min</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY'S CATCH -->
+  <section class="blk" id="catch" style="padding-top:20px">
+    <div class="wrap">
+      <div class="sec-head rev">
+        <span class="sec-label">Today's catch · 07 Aug</span>
+        <h2>What's at the <em>counter</em> right now</h2>
+        <p>Straight off this morning's truck. Reserve from the app, pick up with a QR — no waiting, no phone calls.</p>
+      </div>
+      <div class="fish-grid rev" id="lndFish"></div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how blk" id="how">
+    <div class="wrap">
+      <span class="sec-label rev">The PondFish way</span>
+      <h2 class="rev">From pond to plate in six steps</h2>
+      <ol class="steps rev">
+        <li><b>01</b><h4>Organic ponds</h4><p>Fish raised in certified organic farms around Warangal.</p></li>
+        <li><b>02</b><h4>Live collection</h4><p>Caught alive at dawn — never frozen, never iced at source.</p></li>
+        <li><b>03</b><h4>Truck dispatch</h4><p>Oxygenated truck leaves the farm at 06:00 sharp.</p></li>
+        <li><b>04</b><h4>Warehouse arrival</h4><p>Fresh stock lands at our Hyderabad warehouse by ~07:40.</p></li>
+        <li><b>05</b><h4>You reserve</h4><p>Book your fish in the app — subscription covers your quota.</p></li>
+        <li><b>06</b><h4>QR pickup</h4><p>Show your QR at the store. We prep, you collect. Done.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- SUBSCRIPTIONS -->
+  <section class="blk" id="plans">
+    <div class="wrap">
+      <div class="sec-head rev">
+        <span class="sec-label">Memberships</span>
+        <h2>Simple, quantity-first <em>subscriptions</em></h2>
+        <p>Pay monthly, get a weekly fish allowance. Pick any fish on the counter — your plan covers it.</p>
+      </div>
+      <div class="plans rev">
+        <div class="plan">
+          <h3>Type 1</h3><p class="plan-for">For the weekly fish curry household</p>
+          <div class="plan-price">₹2,000<small> / month</small></div>
+          <ul>
+            <li>✔ Up to <b>&nbsp;2 Kg of fish&nbsp;</b> every week</li>
+            <li>✔ Choose any available fish</li>
+            <li>✔ Allowance resets every 7 days</li>
+            <li>✔ Extra quantity paid via Razorpay</li>
+          </ul>
+          <button class="btn block ghost" onclick="goCustomer()">Choose Type 1</button>
+        </div>
+        <div class="plan hot">
+          <span class="pl-tag">MOST POPULAR</span>
+          <h3>Type 2</h3><p class="plan-for">For serious fish lovers</p>
+          <div class="plan-price">₹6,000<small> / month</small></div>
+          <ul>
+            <li>✔ Up to <b>&nbsp;3 Kg of fish&nbsp;</b> every week</li>
+            <li>✔ Choose any available fish</li>
+            <li>✔ Allowance resets every 7 days</li>
+            <li>✔ Extra quantity paid via Razorpay</li>
+          </ul>
+          <button class="btn block coral" onclick="goCustomer()">Choose Type 2</button>
+        </div>
+      </div>
+      <p class="plan-note rev">Weekly allowance resets automatically every seven days. Anything above your allowance is simply paid per kilogram at checkout — no lock-ins on quantity.</p>
+    </div>
+  </section>
+
+  <!-- WHY PONDFISH -->
+  <section class="blk" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head rev">
+        <span class="sec-label">Why PondFish</span>
+        <h2>The freshest counter in <em>Hyderabad</em></h2>
+      </div>
+      <div class="why-grid rev" id="whyGrid"></div>
+    </div>
+  </section>
+
+  <!-- APP BAND -->
+  <section class="appband">
+    <div class="wrap app-in">
+      <div class="rev">
+        <span class="sec-label">The PondFish app</span>
+        <h2>Your fish counter, in your pocket.</h2>
+        <p>Book before you leave home, track the truck live, and walk straight to pickup with your QR ticket. Push alerts the moment fresh fish lands.</p>
+        <div class="store-btns">
+          <a class="store-btn" onclick="toast('APK download starting… (demo)','arrow')"><span id="playIco"></span><span><small>AVAILABLE ON</small><b>Google Play</b></span></a>
+          <a class="store-btn" onclick="toast('iOS release coming soon','clock')"><span id="appleIco"></span><span><small>COMING SOON ON</small><b>App Store</b></span></a>
+        </div>
+        <p style="margin:16px 0 0;font-size:12px;color:#9FCFC2">Android APK available now · iOS in review</p>
+      </div>
+      <div class="phone rev">
+        <div class="phone-sc">
+          <div class="notch"></div>
+          <p style="font-family:var(--disp);font-size:15px">PondFish</p>
+          <p>Your pickup ticket</p>
+          <canvas id="qr2" width="118" height="118"></canvas>
+          <p>PF-20260807-00125</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="blk" id="contact">
+    <div class="wrap">
+      <div class="sec-head rev">
+        <span class="sec-label">Visit us</span>
+        <h2>Come say hello — or just <em>book ahead</em></h2>
+      </div>
+      <div class="contact rev">
+        <div class="card cinfo">
+          <h3>PondFish Store</h3>
+          <div class="ci-row"><span id="ciPin"></span><div>12/4, Fish Market Road, Uppal<br>Hyderabad 500039<small>Landmark: beside the weekly market gate</small></div></div>
+          <div class="ci-row"><span id="ciPh"></span><div>+91 98480 22334<small>Daily 6:00 AM – 9:00 PM</small></div></div>
+          <div class="ci-row"><span id="ciMl"></span><div>hello@pondfish.in<small>We reply within a few hours</small></div></div>
+          <div class="ci-row"><span id="ciCk"></span><div>Open all seven days<small>Freshest stock lands by 8:00 AM</small></div></div>
+        </div>
+        <form class="card cform" onsubmit="event.preventDefault();toast('Thanks! We\'ll get back to you soon.','check');this.reset()">
+          <h3>Send an enquiry</h3>
+          <div class="field"><label>Your name</label><input type="text" placeholder="Full name" required></div>
+          <div class="field"><label>Mobile number</label><input type="tel" placeholder="+91" required></div>
+          <div class="field"><label>Message</label><textarea rows="3" placeholder="Which fish are you looking for?" required></textarea></div>
+          <button class="btn" type="submit">Send enquiry</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="f-in">
+        <div>
+          <a class="brand" href="#top"><span class="mark" id="brandMark2"></span>PondFish</a>
+          <p style="font-size:13.5px;max-width:260px;margin-top:6px">Live fish from organic farms, trucked fresh to Hyderabad every single morning since 2024.</p>
+        </div>
+        <div><h5>Explore</h5><a href="#catch">Today's Fish</a><a href="#plans">Subscriptions</a><a href="#how">How it Works</a><a onclick="goCustomer()">Customer Login</a></div>
+        <div><h5>Company</h5><a href="#contact">Contact</a><a href="#">About the Farms</a><a href="#">Careers</a><a href="#">WhatsApp Us</a></div>
+        <div><h5>Legal</h5><a href="#">Privacy Policy</a><a href="#">Terms &amp; Conditions</a><a href="#">Refund Policy</a></div>
+      </div>
+      <div class="f-bottom"><span>© 2026 PONDFISH · HYDERABAD</span><span>CRAFTED BY SPROJECTX</span></div>
+    </div>
+  </footer>
+</section>
+
+<!-- ============================================================ -->
+<!-- ======================= CUSTOMER =========================== -->
+<!-- ============================================================ -->
+<section class="portal hidden" id="pt-customer">
+
+  <!-- AUTH -->
+  <div class="cauth" id="cAuth">
+    <div class="cauth-card card" style="box-shadow:0 30px 70px -30px rgba(20,49,43,.4)">
+      <div class="ca-form">
+        <a class="brand" style="font-size:18px"><span class="mark" style="width:28px;height:28px" id="authMark"></span>PondFish</a>
+        <div class="stepbar" style="margin-top:26px"><i class="on" id="sb1"></i><i id="sb2"></i><i id="sb3"></i></div>
+
+        <div id="authStep1">
+          <h2>Welcome.</h2>
+          <p class="sub">Login or create an account with your mobile number — we'll send a one-time code.</p>
+          <div class="field" style="margin-bottom:14px"><label>Mobile number</label><input type="tel" id="phInput" value="+91 98480 12345"></div>
+          <button class="btn block" onclick="sendOtp()">Send OTP →</button>
+        </div>
+
+        <div id="authStep2" class="hidden">
+          <h2>Enter the code</h2>
+          <p class="sub">We sent a 4-digit OTP to <b id="otpPhone"></b></p>
+          <div class="otp-row">
+            <input type="tel" maxlength="1" class="otpbox"><input type="tel" maxlength="1" class="otpbox"><input type="tel" maxlength="1" class="otpbox"><input type="tel" maxlength="1" class="otpbox">
+          </div>
+          <p class="otp-hint">Demo OTP: <b>4321</b></p>
+          <button class="btn block" onclick="verifyOtp()">Verify &amp; continue</button>
+          <p style="text-align:center;margin-top:14px"><button class="btn linky" onclick="authGo(1)">← change number</button></p>
+        </div>
+
+        <div id="authStep3" class="hidden">
+          <h2>Complete your profile</h2>
+          <p class="sub">Just once — this helps us serve you better at the store.</p>
+          <div style="display:grid;gap:13px">
+            <div class="field"><label>Full name</label><input type="text" id="pfName" value="Stevan Antony"></div>
+            <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:13px">
+              <div class="field"><label>Age</label><input type="number" id="pfAge" value="20"></div>
+              <div class="field"><label>Area / Locality</label>
+                <select id="pfArea"><option>Uppal</option><option>Ramanthapur</option><option>Kukatpally</option><option>Secunderabad</option></select>
+              </div>
+            </div>
+            <button class="btn block" onclick="finishProfile()">Enter PondFish →</button>
+          </div>
+        </div>
+
+        <p style="text-align:center;margin-top:22px;font-size:13px;color:var(--mut)">or <button class="btn linky" onclick="login()">explore with the demo account →</button></p>
+      </div>
+      <div class="ca-side">
+        <div>
+          <h3>Reserve today's catch before you leave home.</h3>
+          <ul>
+            <li>✔ Live truck tracking, farm to store</li>
+            <li>✔ Weekly fish allowance with your plan</li>
+            <li>✔ QR pickup — no waiting at the counter</li>
+            <li>✔ Alerts the moment fish arrives</li>
+          </ul>
+        </div>
+        <p class="mono" style="font-size:11px;color:#5E7A72">SECURED BY FIREBASE OTP · NO PASSWORDS NEEDED</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP SHELL -->
+  <div class="capp hidden" id="cApp">
+    <aside class="cnav">
+      <a class="cn-brand"><span class="mark" id="cnMark"></span>PondFish</a>
+      <span class="cn-lab">Menu</span>
+      <button class="cn-it on" data-nav="home" onclick="cView('home')"><span data-ic="home"></span>Home</button>
+      <button class="cn-it" data-nav="market" onclick="cView('market')"><span data-ic="fish"></span>Fish Marketplace</button>
+      <button class="cn-it" data-nav="sub" onclick="cView('sub')"><span data-ic="wallet"></span>Subscription</button>
+      <button class="cn-it" data-nav="bookings" onclick="cView('history')"><span data-ic="qr"></span>Bookings</button>
+      <button class="cn-it" data-nav="notif" onclick="cView('notif')"><span data-ic="bell"></span>Notifications<span class="bdg" id="nfBadge">2</span></button>
+      <span class="cn-lab">Account</span>
+      <button class="cn-it" data-nav="profile" onclick="cView('profile')"><span data-ic="user"></span>Profile</button>
+      <button class="cn-it" data-nav="settings" onclick="cView('settings')"><span data-ic="gear"></span>Settings</button>
+      <div class="cn-foot">Signed in as <b id="cnUser">Stevan</b><br><span class="mono" style="font-size:10.5px">TYPE 1 · ACTIVE</span></div>
+    </aside>
+
+    <div class="cmain">
+      <header class="chead">
+        <div><div class="crumb" id="cCrumb">CUSTOMER PORTAL</div><h3 id="cTitle">Home</h3></div>
+        <div class="right">
+          <button class="icon-btn" onclick="cView('notif')" title="Notifications"><span data-ic="bell"></span><span class="ndot" id="bellDot"></span></button>
+          <div class="avatar">SA</div>
+        </div>
+      </header>
+
+      <div class="cbody">
+
+        <!-- CP-02 HOME -->
+        <div class="view on" id="v-home">
+          <div class="hgrid">
+            <div class="card h-welcome">
+              <p class="hw-hi" id="hGreet">Good morning, Stevan</p>
+              <p class="hw-sub">Member since January 2026 · <b>Type 1</b>&nbsp;<span class="tag ok">ACTIVE</span></p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn sm" onclick="cView('market')">Browse today's fish</button>
+                <button class="btn sm ghost" onclick="cView('sub')">Manage subscription</button>
+              </div>
+            </div>
+            <div class="card h-truck">
+              <div class="ht-top"><span class="tag coral"><span class="live"></span>LIVE</span><b>Fresh fish delivery</b><span class="mono eta" data-eta>18 min</span></div>
+              <div class="route">
+                <div class="route-line"><i style="width:64%"></i><span class="route-truck" style="left:64%" data-truck></span></div>
+                <div class="route-stops"><span>FARM</span><span>HWY</span><span class="now">KUKATPALLY</span><span>STORE</span></div>
+              </div>
+              <p class="ht-loc">Near <b>Kukatpally</b> · TS 09 AB 1234</p>
+            </div>
+          </div>
+
+          <div class="hstats">
+            <div class="card hs" id="hCreditCard">
+              <span>Subscription balance</span>
+              <b class="mono" id="hCredit">₹1,420</b>
+              <small id="hCreditNote">Prepaid credit · auto-deducted at booking</small>
+            </div>
+            <div class="card hs">
+              <span>Weekly allowance</span>
+              <b id="hAllow">0.6 Kg left</b>
+              <div class="meter"><i id="hAllowBar" style="width:70%"></i></div>
+              <small id="hAllowSub">1.4 of 2 Kg used · resets Monday</small>
+            </div>
+            <div class="card hs">
+              <span>Active booking</span>
+              <b class="mono" id="hBookId" style="font-size:17px">PF-20260807-00121</b>
+              <small>Rohu · 2 Kg · ready for pickup</small>
+            </div>
+          </div>
+
+          <div class="hgrid2">
+            <div class="card h-fish">
+              <header><b>Today's fresh fish</b><button class="btn linky" onclick="cView('market')">View all →</button></header>
+              <div class="hf-row" id="hFish"></div>
+            </div>
+            <div class="h-side">
+              <div class="card h-book">
+                <header><b>Your active booking</b><span class="tag ok">ACTIVE</span></header>
+                <div class="hb-body">
+                  <div class="qrmini"><canvas id="qrMini" width="52" height="52"></canvas></div>
+                  <div style="flex:1">
+                    <b style="font-size:14.5px">Rohu · 2 Kg</b>
+                    <small style="display:block;color:var(--mut);font-size:12px" class="mono">PF-20260807-00121 · 09:56 AM</small>
+                    <button class="btn sm" style="margin-top:9px" onclick="openTicket(S.activeBooking)">View QR ticket</button>
+                  </div>
+                </div>
+              </div>
+              <div class="card h-notif">
+                <header><b>Recent notifications</b><button class="btn linky" onclick="cView('notif')">All →</button></header>
+                <div id="hNotifs"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CP-03 MARKETPLACE -->
+        <div class="view" id="v-market">
+          <div class="mkt-bar">
+            <div class="search"><span data-ic="search"></span><input type="text" id="mktSearch" placeholder="Search fish…" oninput="MF.q=this.value;renderMarketplace()"></div>
+            <div class="chip-row" id="mktCats"></div>
+            <select id="mktAvail" style="width:auto" onchange="MF.avail=this.value;renderMarketplace()">
+              <option value="today">Available today</option>
+              <option value="all">All statuses</option>
+            </select>
+          </div>
+          <div class="fish-grid" id="mktGrid"></div>
+        </div>
+
+        <!-- CP-04 FISH DETAILS -->
+        <div class="view" id="v-detail"><div id="dtlBox"></div></div>
+
+        <!-- CP-05 BOOKING -->
+        <div class="view" id="v-book"><div class="bk" id="bkBox"></div></div>
+
+        <!-- CP-06 CHECKOUT -->
+        <div class="view" id="v-checkout"><div class="bk" id="ckBox"></div></div>
+
+        <!-- CP-07 QR TICKET -->
+        <div class="view" id="v-ticket"><div class="ticket-wrap" id="tkBox"></div></div>
+
+        <!-- CP-08 SUBSCRIPTION -->
+        <div class="view" id="v-sub"><div id="subBox" style="max-width:760px;margin:0 auto"></div></div>
+
+        <!-- CP-09 NOTIFICATIONS -->
+        <div class="view" id="v-notif">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+            <div class="chip-row" id="nfCats"></div>
+            <button class="btn linky" onclick="markAllRead()">Mark all as read ✓</button>
+          </div>
+          <div class="notif-list" id="nfList"></div>
+        </div>
+
+        <!-- CP-10 BOOKING HISTORY -->
+        <div class="view" id="v-history">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+            <div class="chip-row" id="hsFilters"></div>
+            <button class="btn sm ghost" onclick="cView('market')">+ New booking</button>
+          </div>
+          <div id="histList"></div>
+        </div>
+
+        <!-- CP-11 PROFILE -->
+        <div class="view" id="v-profile"><div style="max-width:820px;margin:0 auto" id="profBox"></div></div>
+
+        <!-- CP-12 SETTINGS -->
+        <div class="view" id="v-settings"><div style="max-width:640px;margin:0 auto" id="setBox"></div></div>
+
+      </div>
+    </div>
+
+    <nav class="cbottom">
+      <button class="cb-it on" data-nav="home" onclick="cView('home')"><span data-ic="home"></span>Home</button>
+      <button class="cb-it" data-nav="market" onclick="cView('market')"><span data-ic="fish"></span>Fish</button>
+      <button class="cb-it" data-nav="sub" onclick="cView('sub')"><span data-ic="wallet"></span>Plan</button>
+      <button class="cb-it" data-nav="notif" onclick="cView('notif')"><span data-ic="bell"></span>Alerts</button>
+      <button class="cb-it" data-nav="profile" onclick="cView('profile')"><span data-ic="user"></span>Profile</button>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- ======================== WORKER ============================ -->
+<!-- ============================================================ -->
+<section class="portal hidden" id="pt-worker">
+  <div class="wtop">
+    <div class="wtop-in">
+      <span class="wbrand"><span class="mark" id="wMark"></span>PondFish <span style="opacity:.5;font-weight:400">· Worker</span></span>
+      <span class="wstore">PONDFISH STORE · HYDERABAD</span>
+      <div class="wtabs">
+        <button class="on" data-wt="active" onclick="wTab('active')">Active Orders</button>
+        <button data-wt="done" onclick="wTab('done')">Completed</button>
+        <button data-wt="profile" onclick="wTab('profile')">Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wbody">
+    <!-- WP-01 -->
+    <div id="w-active">
+      <div class="wstats">
+        <div class="wstat"><span>Today's orders</span><b id="wToday">48</b></div>
+        <div class="wstat hl"><span>Pending pickup</span><b id="wPending">5</b></div>
+        <div class="wstat"><span>Completed</span><b id="wDone">43</b></div>
+      </div>
+      <div class="wtool">
+        <div class="search"><span data-ic="search"></span><input type="text" id="wSearch" placeholder="Search by booking ID, name or mobile…" oninput="renderWList()"></div>
+        <button class="btn coral scanbtn" onclick="scanQR()"><span data-ic="scan"></span>Scan QR</button>
+      </div>
+      <div id="wList"></div>
+    </div>
+
+    <!-- WP-02 -->
+    <div id="w-done" class="hidden">
+      <div class="chip-row" style="margin-bottom:16px" id="wDoneFilters"></div>
+      <div id="wDoneList"></div>
+    </div>
+
+    <!-- WP-03 -->
+    <div id="w-profile" class="hidden">
+      <div class="wprofile">
+        <div class="card wp-card" style="display:flex;gap:16px;align-items:center">
+          <div class="avatar" style="width:56px;height:56px;border-radius:14px;font-size:18px;background:var(--teal)">RK</div>
+          <div><h3 style="font:600 21px var(--disp)">Ramesh Kumar</h3><span class="mono" style="font-size:12px;color:var(--mut)">WK-1008 · STORE WORKER</span><div><span class="tag ok" style="margin-top:6px">ACTIVE</span></div></div>
+        </div>
+        <div class="card wp-card"><h5>Worker information</h5>
+          <div class="kv2"><span>Full name</span><b>Ramesh Kumar</b></div>
+          <div class="kv2"><span>Mobile</span><b class="mono">+91 90000 11223</b></div>
+          <div class="kv2"><span>Employee ID</span><b class="mono">WK-1008</b></div>
+          <div class="kv2"><span>Role</span><b>Store Worker</b></div>
+        </div>
+        <div class="card wp-card"><h5>Assigned store</h5>
+          <div class="kv2"><span>Store</span><b>PondFish Store</b></div>
+          <div class="kv2"><span>Location</span><b>Uppal, Hyderabad</b></div>
+          <div class="kv2"><span>Last login</span><b class="mono">07 Aug 2026 · 09:12 AM</b></div>
+        </div>
+        <button class="btn ghost block" onclick="toast('Logged out (demo)','out')"><span data-ic="out"></span>Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- booking detail sheet -->
+  <div class="sheet" id="wSheet">
+    <div class="sheet-h"><b style="font:600 17px var(--disp)">Booking details</b><button class="icon-btn" onclick="closeWSheet()"><span data-ic="x"></span></button></div>
+    <div class="sheet-b" id="wSheetBody"></div>
+    <div class="sheet-f" id="wSheetFoot"></div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- ========================= ADMIN ============================ -->
+<!-- ============================================================ -->
+<section class="portal hidden" id="pt-admin">
+  <div class="alayout">
+    <aside class="anav">
+      <span class="an-brand"><span class="mark" id="anMark"></span>PondFish</span>
+      <button class="an-it on" data-an="dash" onclick="aNav('dash')"><span data-ic="home"></span>Dashboard</button>
+      <span class="an-lab">Operations</span>
+      <button class="an-it" data-an="inv" onclick="aNav('inv')"><span data-ic="box"></span>Fish Inventory</button>
+      <button class="an-it" data-an="truck" onclick="aNav('truck')"><span data-ic="truck"></span>Live Truck</button>
+      <button class="an-it" data-an="book" onclick="aNav('book')"><span data-ic="qr"></span>Bookings</button>
+      <span class="an-lab">Customers</span>
+      <button class="an-it" data-an="crm" onclick="aNav('crm')"><span data-ic="users"></span>Customers (CRM)</button>
+      <button class="an-it" data-an="subm" onclick="aNav('subm')"><span data-ic="wallet"></span>Subscriptions</button>
+      <span class="an-lab">Staff</span>
+      <button class="an-it" data-an="work" onclick="aNav('work')"><span data-ic="user"></span>Workers</button>
+      <span class="an-lab">Business</span>
+      <button class="an-it" data-an="notif" onclick="aNav('notif')"><span data-ic="bell"></span>Notifications</button>
+      <button class="an-it" data-an="web" onclick="aNav('web')"><span data-ic="globe"></span>Website Content</button>
+      <button class="an-it" data-an="set" onclick="aNav('set')"><span data-ic="gear"></span>Business Settings</button>
+      <span class="an-lab">Reports</span>
+      <button class="an-it" data-an="rep" onclick="aNav('rep')"><span data-ic="chart"></span>Analytics</button>
+      <button class="an-it" data-an="audit" onclick="aNav('audit')"><span data-ic="doc"></span>Audit Logs</button>
+    </aside>
+
+    <div class="amain">
+      <header class="ahead">
+        <div><h3 id="aTitle">Dashboard</h3></div>
+        <span class="adate">THU · 07 AUG 2026</span>
+        <span class="achip"><span class="avatar">AD</span>Owner</span>
+      </header>
+
+      <div class="abody">
+
+        <!-- AP-01 DASHBOARD -->
+        <div class="aview on" id="a-dash">
+          <div class="a-cards" id="aCards"></div>
+          <div class="a-grid">
+            <div class="a-card">
+              <header><b>Revenue — last 7 days</b><button class="btn linky" onclick="aNav('rep')">Full report →</button></header>
+              <div class="bars" id="revBars"></div>
+            </div>
+            <div class="a-card">
+              <header><b>Attention required</b><span class="tag warn" id="alertCount">3 OPEN</span></header>
+              <div id="alertList"></div>
+              <header style="margin-top:18px"><b>Quick actions</b></header>
+              <div class="qa-grid">
+                <button class="qa" onclick="aNav('truck')"><span data-ic="truck"></span>Publish delivery</button>
+                <button class="qa" onclick="aNav('inv')"><span data-ic="box"></span>Update stock</button>
+                <button class="qa" onclick="aNav('notif')"><span data-ic="bell"></span>New notice</button>
+                <button class="qa" onclick="aNav('inv');openAddFish()"><span data-ic="plus"></span>Add fish</button>
+                <button class="qa" onclick="aNav('work')"><span data-ic="user"></span>Add worker</button>
+                <button class="qa" onclick="aNav('book')"><span data-ic="qr"></span>Bookings</button>
+              </div>
+            </div>
+          </div>
+          <div class="a-card">
+            <header><b>Recent business activity</b><span class="tag teal">LIVE</span></header>
+            <div id="feedList"></div>
+          </div>
+        </div>
+
+        <!-- AP-02 INVENTORY -->
+        <div class="aview" id="a-inv">
+          <div class="a-cards" style="grid-template-columns:repeat(4,1fr)" id="invStats"></div>
+          <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+            <div class="search" style="position:relative;flex:1;min-width:220px"><span data-ic="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mut)"></span><input type="text" placeholder="Search fish…" style="padding-left:38px" oninput="renderAdminInv(this.value)"></div>
+            <button class="btn" onclick="openAddFish()"><span data-ic="plus"></span>Add new fish</button>
+          </div>
+          <div id="invList"></div>
+          <p style="font-size:12px;color:var(--mut);margin-top:12px">ⓘ Fish automatically becomes unavailable when stock falls to 0.5 Kg or below.</p>
+        </div>
+
+        <!-- AP-03 LIVE TRUCK -->
+        <div class="aview" id="a-truck">
+          <div class="truck-hero">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+              <div><span class="tag coral"><span class="live"></span>DELIVERY IN PROGRESS</span>
+                <h3 style="font:600 24px var(--disp);margin-top:8px">Warangal Farm → PondFish Store</h3>
+                <p style="color:var(--ink2);font-size:13.5px">Truck TS 09 AB 1234 · Driver Srinivas · OneLap GPS · pinged 12s ago</p>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn ghost sm" id="pubBtn" onclick="togglePublish()">Pause customer visibility</button>
+                <button class="btn sm" onclick="markArrived()">Mark arrived at warehouse</button>
+              </div>
+            </div>
+            <div class="truck-map">
+              <div class="route" style="position:relative;z-index:1">
+                <div class="route-line"><i id="truckProg" style="width:64%"></i><span class="route-truck" id="admTruck" style="left:64%"></span></div>
+                <div class="route-stops" style="font-size:11.5px"><span>ORGANIC FARM<br>WARANGAL · 06:12</span><span>WARANGAL HWY<br>07:05</span><span class="now">KUKATPALLY<br>NOW</span><span>PONDFISH STORE<br>ETA <span data-eta>18 min</span></span></div>
+              </div>
+            </div>
+            <div class="truck-grid">
+              <div class="a-card" style="margin:0"><header style="margin-bottom:10px"><b>Cargo</b></header>
+                <div class="kv2"><span>Rohu</span><b>18 Kg</b></div><div class="kv2"><span>Katla</span><b>12 Kg</b></div><div class="kv2"><span>Murrel</span><b>6 Kg</b></div><div class="kv2"><span>Tilapia</span><b>14 Kg</b></div></div>
+              <div class="a-card" style="margin:0"><header style="margin-bottom:10px"><b>Timeline</b></header>
+                <div class="kv2"><span>Left farm</span><b class="mono">06:12 AM</b></div><div class="kv2"><span>Hwy checkpoint</span><b class="mono">07:05 AM</b></div><div class="kv2"><span>Kukatpally</span><b class="mono">NOW</b></div><div class="kv2"><span>ETA store</span><b class="mono" style="color:var(--coral)" data-eta>18 min</b></div></div>
+              <div class="a-card" style="margin:0"><header style="margin-bottom:10px"><b>Customer visibility</b></header>
+                <div class="kv2"><span>Push on departure</span><b>Sent · 06:13 AM</b></div><div class="kv2"><span>Live tracking</span><b id="pubState" style="color:var(--ok)">Published ✓</b></div><div class="kv2"><span>Watching now</span><b>41 customers</b></div><div class="kv2"><span>Arrival alert</span><b>Auto · on arrival</b></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AP-04 BOOKINGS -->
+        <div class="aview" id="a-book">
+          <div class="chip-row" style="margin-bottom:16px" id="abFilters"></div>
+          <div class="a-card" style="padding:6px 12px;overflow-x:auto"><table class="tbl" id="abTable"></table></div>
+        </div>
+
+        <!-- AP-05 CRM -->
+        <div class="aview" id="a-crm">
+          <div class="a-cards" style="grid-template-columns:repeat(4,1fr)">
+            <div class="ac"><span>Total customers</span><b>486</b><small>+18 this week</small></div>
+            <div class="ac"><span>Active subscribers</span><b>87</b><small>68 Type 1 · 19 Type 2</small></div>
+            <div class="ac"><span>Bookings today</span><b>48</b><small>17 pending pickup</small></div>
+            <div class="ac"><span>At-risk subs</span><b style="color:var(--coral)">4</b><small>credit under ₹200</small></div>
+          </div>
+          <div class="a-card" style="padding:6px 12px;overflow-x:auto">
+            <table class="tbl">
+              <thead><tr><th>Customer</th><th>Mobile</th><th>Plan</th><th>This week</th><th>Lifetime</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><b>Stevan Antony</b><br><small class="mono" style="color:var(--mut)">PF-100284</small></td><td class="mono">98480 12345</td><td><span class="tag teal">TYPE 1</span></td><td>1.4 / 2 Kg</td><td class="mono">₹12,840</td><td><span class="tag ok">ACTIVE</span></td></tr>
+                <tr><td><b>Rahul Verma</b></td><td class="mono">98661 40987</td><td><span class="tag teal">TYPE 2</span></td><td>2.5 / 3 Kg</td><td class="mono">₹31,200</td><td><span class="tag ok">ACTIVE</span></td></tr>
+                <tr><td><b>Kiran Kumar</b></td><td class="mono">90104 55621</td><td><span class="tag teal">TYPE 1</span></td><td>0.8 / 2 Kg</td><td class="mono">₹8,160</td><td><span class="tag ok">ACTIVE</span></td></tr>
+                <tr><td><b>Meena Iyer</b></td><td class="mono">98499 78120</td><td><span class="tag off">NONE</span></td><td>—</td><td class="mono">₹2,925</td><td><span class="tag warn">NO PLAN</span></td></tr>
+                <tr><td><b>Arjun Rao</b></td><td class="mono">96525 34098</td><td><span class="tag teal">TYPE 1</span></td><td>1.9 / 2 Kg</td><td class="mono">₹15,480</td><td><span class="tag warn">LOW CREDIT</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- AP-06 SUBSCRIPTION MGMT -->
+        <div class="aview" id="a-subm">
+          <div class="plans" style="max-width:100%;grid-template-columns:1fr 1fr;margin-bottom:18px">
+            <div class="card" style="padding:24px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h3 style="font:600 20px var(--disp)">Type 1</h3><small style="color:var(--mut)">₹2,000 / month · up to 2 Kg weekly</small></div><button class="sw on" onclick="this.classList.toggle('on');toast('Plan availability updated','check')"></button></div>
+              <div class="kv2" style="margin-top:12px"><span>Active subscribers</span><b>68</b></div><div class="kv2"><span>MRR</span><b class="mono">₹1,36,000</b></div><div class="kv2"><span>Avg. weekly usage</span><b>1.6 Kg</b></div></div>
+            <div class="card" style="padding:24px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h3 style="font:600 20px var(--disp)">Type 2</h3><small style="color:var(--mut)">₹6,000 / month · up to 3 Kg weekly</small></div><button class="sw on" onclick="this.classList.toggle('on');toast('Plan availability updated','check')"></button></div>
+              <div class="kv2" style="margin-top:12px"><span>Active subscribers</span><b>19</b></div><div class="kv2"><span>MRR</span><b class="mono">₹1,14,000</b></div><div class="kv2"><span>Avg. weekly usage</span><b>2.7 Kg</b></div></div>
+          </div>
+          <div class="a-card"><header><b>Engine rules</b><span class="tag teal">READ-ONLY</span></header>
+            <div class="kv2"><span>Weekly allowance reset</span><b>Every Monday · 00:00 IST</b></div>
+            <div class="kv2"><span>Excess quantity billing</span><b>Razorpay · per Kg at listed price</b></div>
+            <div class="kv2"><span>Subscription credit</span><b>Deducted automatically on covered quantity</b></div>
+            <div class="kv2"><span>Recharge</span><b>Customer-initiated via Customer Portal</b></div>
+          </div>
+        </div>
+
+        <!-- AP-07 WORKERS -->
+        <div class="aview" id="a-work">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:14px"><button class="btn" onclick="toast('Worker invite sent (demo)','send')"><span data-ic="plus"></span>Add worker</button></div>
+          <div class="a-card" style="padding:6px 12px"><table class="tbl">
+            <thead><tr><th>Worker</th><th>Employee ID</th><th>Role</th><th>Last login</th><th>Orders today</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><b>Ramesh Kumar</b></td><td class="mono">WK-1008</td><td>Store Worker</td><td class="mono">07 Aug · 09:12 AM</td><td>26</td><td><span class="tag ok">ACTIVE</span></td></tr>
+              <tr><td><b>Suresh Yadav</b></td><td class="mono">WK-1009</td><td>Store Worker</td><td class="mono">07 Aug · 08:55 AM</td><td>22</td><td><span class="tag ok">ACTIVE</span></td></tr>
+              <tr><td><b>Venkat Reddy</b></td><td class="mono">WK-1004</td><td>Fish Prep</td><td class="mono">06 Aug · 06:40 PM</td><td>—</td><td><span class="tag off">OFF DUTY</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <!-- AP-08 NOTIFICATIONS -->
+        <div class="aview" id="a-notif">
+          <div class="a-grid" style="grid-template-columns:1fr 1fr">
+            <div class="a-card"><header><b>Compose notification</b></header>
+              <form onsubmit="event.preventDefault();sendAdminNotif(this)" style="display:grid;gap:13px">
+                <div class="field"><label>Title</label><input type="text" id="anTitle" placeholder="e.g. Fresh fish has arrived" required></div>
+                <div class="field"><label>Message</label><textarea rows="3" id="anBody" placeholder="Short message customers will see…" required></textarea></div>
+                <div class="field"><label>Audience</label><select><option>All customers</option><option>Active subscribers only</option><option>No subscription</option></select></div>
+                <div style="display:flex;gap:10px"><button class="btn" type="submit"><span data-ic="send"></span>Send now</button><button class="btn ghost" type="button" onclick="toast('Scheduled for 5:00 PM (demo)','clock')">Schedule</button></div>
+              </form>
+            </div>
+            <div class="a-card"><header><b>Sent recently</b></header><div id="sentList"></div></div>
+          </div>
+        </div>
+
+        <!-- AP-09 WEBSITE CONTENT -->
+        <div class="aview" id="a-web">
+          <div class="a-card" style="margin-bottom:18px"><header><b>Landing page</b><span class="tag ok">PUBLISHED</span></header>
+            <div style="display:grid;gap:13px">
+              <div class="field"><label>Hero heading</label><input type="text" value="Fish that was swimming yesterday, at your door today."></div>
+              <div class="field"><label>Hero subtext</label><textarea rows="2">PondFish sources live fish directly from certified organic farms, trucked to our warehouse every morning.</textarea></div>
+              <div class="set-row" style="border:1px solid var(--line);border-radius:10px"><div><b style="font-size:13.5px">Arrivals ticker</b><small>Show live arrivals strip on the homepage</small></div><button class="sw on" onclick="this.classList.toggle('on')"></button></div>
+              <div><button class="btn sm" onclick="toast('Website content published','check')">Publish changes</button></div>
+            </div>
+          </div>
+          <div class="a-card"><header><b>Promotional banners</b><button class="btn sm ghost" onclick="toast('Banner editor (demo)','plus')">+ New banner</button></header>
+            <div class="kv2"><span>Monsoon Catch Week — 10% off marine</span><b><span class="tag ok">LIVE</span></b></div>
+            <div class="kv2"><span>Refer a friend, get 0.5 Kg free</span><b><span class="tag off">DRAFT</span></b></div>
+          </div>
+        </div>
+
+        <!-- AP-10 REPORTS -->
+        <div class="aview" id="a-rep">
+          <div class="a-grid" style="grid-template-columns:1.6fr 1fr">
+            <div class="a-card"><header><b>Revenue — 7 days</b><span class="mono" style="color:var(--mut)">TOTAL ₹89.4K</span></header><div class="bars" id="repBars" style="height:190px"></div></div>
+            <div class="a-card"><header><b>Subscription mix</b></header>
+              <div class="donut"><b>87</b></div>
+              <div class="legend"><div><i style="background:var(--teal)"></i>Type 1 — 68 members (78%)</div><div><i style="background:var(--coral)"></i>Type 2 — 19 members (22%)</div></div>
+            </div>
+          </div>
+          <div class="a-card" style="margin-top:18px"><header><b>Top fish this month — by quantity sold</b></header>
+            <table class="tbl"><thead><tr><th>#</th><th>Fish</th><th>Quantity</th><th>Revenue</th><th>Demand trend</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">01</td><td><b>Rohu</b></td><td class="mono">128 Kg</td><td class="mono">₹40,960</td><td><span class="tag ok">▲ RISING</span></td></tr>
+              <tr><td class="mono">02</td><td><b>Katla</b></td><td class="mono">96 Kg</td><td class="mono">₹26,880</td><td><span class="tag teal">— STABLE</span></td></tr>
+              <tr><td class="mono">03</td><td><b>Vannamei Prawns</b></td><td class="mono">61 Kg</td><td class="mono">₹27,450</td><td><span class="tag ok">▲ RISING</span></td></tr>
+              <tr><td class="mono">04</td><td><b>Tilapia</b></td><td class="mono">54 Kg</td><td class="mono">₹12,960</td><td><span class="tag warn">▼ FALLING</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+
+        <!-- AP-11 SETTINGS -->
+        <div class="aview" id="a-set">
+          <div class="a-card" style="max-width:640px"><header><b>Business configuration</b></header>
+            <form style="display:grid;gap:13px" onsubmit="event.preventDefault();toast('Settings saved','check')">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+                <div class="field"><label>Store name</label><input type="text" value="PondFish Store"></div>
+                <div class="field"><label>Phone</label><input type="tel" value="+91 98480 22334"></div>
+                <div class="field"><label>Opens</label><input type="text" value="6:00 AM"></div>
+                <div class="field"><label>Closes</label><input type="text" value="9:00 PM"></div>
+              </div>
+              <div class="field"><label>Address</label><input type="text" value="12/4, Fish Market Road, Uppal, Hyderabad 500039"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+                <div class="field"><label>Weekly allowance reset day</label><select><option>Monday</option><option>Sunday</option></select></div>
+                <div class="field"><label>Low-stock threshold (Kg)</label><input type="number" value="0.5" step="0.1"></div>
+              </div>
+              <div><button class="btn" type="submit">Save settings</button></div>
+            </form>
+          </div>
+        </div>
+
+        <!-- AP-12 AUDIT -->
+        <div class="aview" id="a-audit">
+          <div class="a-card" style="padding:6px 16px"><table class="tbl">
+            <thead><tr><th>Timestamp</th><th>Actor</th><th>Module</th><th>Action</th></tr></thead>
+            <tbody class="mono" style="font-size:12px">
+              <tr><td>07 Aug · 11:58</td><td>admin</td><td>Inventory</td><td>Updated Rohu stock 12 → 10.5 Kg</td></tr>
+              <tr><td>07 Aug · 11:42</td><td>system</td><td>Booking</td><td>PF-20260807-00125 created (Stevan)</td></tr>
+              <tr><td>07 Aug · 09:12</td><td>WK-1008</td><td>Worker</td><td>Login — PondFish Store</td></tr>
+              <tr><td>07 Aug · 08:15</td><td>admin</td><td>Notifications</td><td>Push sent — "Fresh fish has arrived"</td></tr>
+              <tr><td>07 Aug · 07:40</td><td>admin</td><td>Live Truck</td><td>Marked arrived · inventory synced</td></tr>
+              <tr><td>07 Aug · 06:13</td><td>system</td><td>Live Truck</td><td>Departure push delivered to 312 devices</td></tr>
+              <tr><td>06 Aug · 21:02</td><td>admin</td><td>Settings</td><td>Low-stock threshold set to 0.5 Kg</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- inventory edit sheet -->
+  <div class="sheet" id="invSheet">
+    <div class="sheet-h"><b style="font:600 17px var(--disp)" id="invSheetTitle">Edit fish</b><button class="icon-btn" onclick="closeInvSheet()"><span data-ic="x"></span></button></div>
+    <div class="sheet-b" id="invSheetBody"></div>
+    <div class="sheet-f" style="display:flex;gap:10px">
+      <button class="btn block" onclick="saveInv()">Save changes</button>
+      <button class="btn ghost" onclick="removeToday()" style="flex:none">Remove from today</button>
+    </div>
+  </div>
+</section>
+
+<div id="toast"></div>
+<div id="overlay" class="ov hidden" onclick="if(event.target===this)closeModal()"><div class="ovcard" id="ovcard" style="padding:26px"></div></div>
+
+<script>
+/* ============================== helpers ============================== */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const money=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const kg=n=>(Math.round(n*10)/10)+' Kg';
+
+const P={home:'M3 11.5 12 4l9 7.5M5.5 9.7V20h13V9.7',
+fish:'M3 12c2.6-3.9 6-6 9-6 2.7 0 5.4 1.6 7.3 4l2.2-1.8-.8 3.8.8 3.8-2.2-1.8c-1.9 2.4-4.6 4-7.3 4-3 0-6.4-2.1-9-6ZM7.8 10.6h.01',
+bell:'M18 8.4a6 6 0 1 0-12 0c0 6.6-2 6.6-2 8.6h16c0-2-2-2-2-8.6M10.5 20a1.8 1.8 0 0 0 3 0',
+user:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7.5 8.5a7.5 7.5 0 0 1 15 0',
+users:'M16.5 21a4.5 4.5 0 0 0-9 0M12 13a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM19.5 10.5a2.8 2.8 0 1 0-2.2-4.6M21.5 20a4.5 4.5 0 0 0-3-4.2',
+gear:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7.4-3a7.6 7.6 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7.6 7.6 0 0 0-2-1.2L14.5 3h-5L9 5.6a7.6 7.6 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 0 0 0 2.4l-2 1.5 2 3.4 2.3-.9a7.6 7.6 0 0 0 2 1.2L9.5 21h5l.5-2.6a7.6 7.6 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.07-.4.1-.8.1-1.2Z',
+qr:'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM20 14v3M17 20h3',
+wallet:'M3 7.5A2.5 2.5 0 0 1 5.5 5h11A2.5 2.5 0 0 1 19 7.5V9M3 7.5V17a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H3Zm13 6.5h.01',
+clock:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-13v5l3 2',
+truck:'M1.5 6h12v10h-12zM13.5 9.5h3.6l3.4 3.2V16h-7M5.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
+box:'M21 8l-9-5-9 5v8l9 5 9-5V8Zm-18 0L12 13l9-5M12 13v8',
+chart:'M4 20v-7M9.5 20V6M15 20v-9M20.5 20V9',
+search:'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Zm10 3-4.5-4.5',
+plus:'M12 5v14M5 12h14',
+check:'M4.5 12.5 10 18 19.5 7',
+x:'M6 6l12 12M18 6 6 18',
+arrow:'M5 12h14m-6-6 6 6-6 6',
+chev:'m9 5 7 7-7 7',
+out:'M15 4h4v16h-4M13 12H3m0 0 4-4m-4 4 4 4',
+pin:'M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11Zm0-8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z',
+phone:'M22 16.9v2a2 2 0 0 1-2.2 2 19 19 0 0 1-8.3-3 18.7 18.7 0 0 1-5.4-5.4 19 19 0 0 1-3-8.3A2 2 0 0 1 5.1 2h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 5.4 5.4l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2Z',
+scan:'M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M3 12h18',
+send:'M22 2 11 13M22 2 15 22l-4-9-9-4Z',
+globe:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm-9-9h18M12 3a13.5 13.5 0 0 1 0 18 13.5 13.5 0 0 1 0-18Z',
+doc:'M6 2.5h8l5 5V21.5H6zM14 2.5v5h5'};
+function I(n){return `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${P[n]}"/></svg>`}
+function hydrateIcons(){$$('[data-ic]').forEach(e=>{e.innerHTML=I(e.dataset.ic)})}
+
+let tt;
+function toast(msg,icon='check'){const t=$('#toast');t.innerHTML=I(icon)+'<span>'+msg+'</span>';t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600)}
+const ov=$('#overlay'),ovc=$('#ovcard');
+function modal(html){ovc.innerHTML=html;ov.classList.remove('hidden')}
+function closeModal(){ov.classList.add('hidden')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeWSheet();closeInvSheet()}});
+
+/* fish illustration */
+function fishArt(f){
+  const st=f.stripes?`<path d="M42 24 v30 M54 21 v36 M66 23 v32" stroke="${f.c2}" stroke-width="5" opacity=".3" fill="none" stroke-linecap="round"/>`:'';
+  return `<svg class="fart" viewBox="0 0 120 80" aria-hidden="true">
+  <ellipse cx="60" cy="68" rx="38" ry="4" fill="rgba(20,49,43,.07)"/>
+  <path d="M84 40 L110 24 L103 40 L110 56 Z" fill="${f.c2}"/>
+  <path d="M12 41 C 22 18, 58 12, 80 30 C 90 36, 90 45, 80 50 C 58 68, 22 63, 12 41 Z" fill="${f.c1}"/>
+  <path d="M46 21 C 52 12, 64 12, 69 17 L 57 27 Z" fill="${f.c2}"/>
+  <path d="M47 44 C 52 52, 60 54, 66 52 L 54 41 Z" fill="${f.c2}" opacity=".85"/>
+  ${st}
+  <path d="M32 28 C 37 34, 37 47, 32 53" stroke="${f.c2}" stroke-width="2.5" fill="none" opacity=".7"/>
+  <circle cx="24" cy="36" r="3.2" fill="#14312B"/><circle cx="25.2" cy="34.8" r="1" fill="#fff"/></svg>`;
+}
+const truckSVG=`<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${P.truck}"/></svg>`;
+
+/* QR generator (deterministic, demo) */
+function drawQR(cv,seedStr){
+  const n=25,s=cv.width/n,ctx=cv.getContext('2d');
+  let seed=7;for(const c of seedStr)seed=(seed*31+c.charCodeAt(0))>>>0;
+  const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);ctx.fillStyle='#14312B';
+  const inF=(x,y)=>(x<8&&y<8)||(x>=n-8&&y<8)||(x<8&&y>=n-8);
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){if(inF(x,y))continue;if(rnd()>.52)ctx.fillRect(x*s,y*s,s+.3,s+.3)}
+  const fin=(fx,fy)=>{ctx.fillStyle='#14312B';ctx.fillRect(fx*s,fy*s,7*s,7*s);ctx.fillStyle='#fff';ctx.fillRect((fx+1)*s,(fy+1)*s,5*s,5*s);ctx.fillStyle='#14312B';ctx.fillRect((fx+2)*s,(fy+2)*s,3*s,3*s)};
+  fin(0,0);fin(n-7,0);fin(0,n-7);
+}
+
+/* ============================== data ============================== */
+const FISH=[
+ {id:'rohu',name:'Rohu',cat:'Freshwater',price:320,stock:12,status:'available',farm:'Sri Lakshmi Organic Ponds, Warangal',desc:'The classic Andhra curry fish — firm, mild and sweet. Sourced alive and cleaned to order.',c1:'#A7BFCC',c2:'#5F7E91'},
+ {id:'katla',name:'Katla',cat:'Freshwater',price:280,stock:9,status:'available',farm:'Kakatiya Organic Farms, Warangal',desc:'Big-headed river favourite with rich, oily flesh. Best in thick slices.',c1:'#B9C4A9',c2:'#77896B'},
+ {id:'tilapia',name:'Tilapia',cat:'Freshwater',price:240,stock:14,status:'available',farm:'Sri Lakshmi Organic Ponds, Warangal',desc:'Lean, bone-light and quick to cook. A weekday staple.',c1:'#D9C3A5',c2:'#96774F',stripes:true},
+ {id:'murrel',name:'Murrel',cat:'Freshwater',price:380,stock:0,status:'coming',farm:'Kakatiya Organic Farms, Warangal',desc:'Snakehead with dense white meat — prized for rasam. Still on the truck.',c1:'#7E8E7A',c2:'#4C5D49'},
+ {id:'vannamei',name:'Vannamei Prawns',cat:'Marine',price:450,stock:8,status:'available',farm:'Pulicat Lake Co-operative',desc:'Juicy coastal prawns, deveined on request at the counter.',c1:'#F2B39C',c2:'#D96A45'},
+ {id:'pomfret',name:'Pomfret',cat:'Marine',price:520,stock:5,status:'available',farm:'Vizag Coast Co-operative',desc:'Flat, silvery and buttery — the fry-pan king.',c1:'#C5CCD6',c2:'#7D8999'},
+ {id:'seer',name:'Seer Fish',cat:'Marine',price:560,stock:0,status:'coming',farm:'Vizag Coast Co-operative',desc:'Steak-cut vanjaram, arriving with the second haul today.',c1:'#9FB6C6',c2:'#56748A',stripes:true},
+ {id:'crab',name:'Mud Crab',cat:'Shellfish',price:340,stock:0,status:'out',farm:'Pulicat Lake Co-operative',desc:'Back tomorrow morning — call us or enable alerts to be notified.',c1:'#9AA7AE',c2:'#5E707A'}
+];
+const S={
+ loggedIn:false,
+ user:{name:'Stevan Antony',first:'Stevan',phone:'+91 98480 12345',age:20,area:'Uppal',id:'PF-100284',since:'January 2026'},
+ sub:{type:'Type 1',fee:2000,allow:2,used:1.4,credit:1420,active:true,reset:'Monday'},
+ draft:{fish:null,qty:1},
+ activeBooking:{id:'PF-20260807-00121',fish:'Rohu',qty:2,date:'07 Aug 2026',time:'09:56 AM',covered:2,paid:0,amt:0,status:'Active'},
+ history:[
+  {id:'PF-20260807-00121',fish:'Rohu',qty:2,date:'07 Aug 2026',time:'09:56 AM',covered:2,paid:0,amt:0,status:'Active'},
+  {id:'PF-20260806-00118',fish:'Rohu',qty:2,date:'06 Aug 2026',time:'11:20 AM',covered:2,paid:0,amt:0,status:'Completed',done:'12:08 PM'},
+  {id:'PF-20260804-00096',fish:'Vannamei Prawns',qty:1.5,date:'04 Aug 2026',time:'10:02 AM',covered:1,paid:.5,amt:225,status:'Completed',done:'11:14 AM'},
+  {id:'PF-20260802-00071',fish:'Katla',qty:3,date:'02 Aug 2026',time:'12:36 PM',covered:2,paid:1,amt:280,status:'Completed',done:'01:20 PM'}],
+ notifs:[
+  {cat:'Delivery',icon:'truck',cls:'coral',title:'Fresh fish has arrived',desc:"Today's catch reached the warehouse at 7:40 AM.",t:'Today · 8:15 AM',unread:true},
+  {cat:'Delivery',icon:'truck',cls:'coral',title:'Live delivery started',desc:'Truck left Warangal farm. ETA 42 minutes.',t:'Today · 6:13 AM',unread:true},
+  {cat:'Booking',icon:'qr',cls:'',title:'Booking completed',desc:'PF-20260806-00118 · Rohu 2 Kg',t:'Yesterday · 12:08 PM',unread:false},
+  {cat:'Subscription',icon:'wallet',cls:'amber',title:'Weekly allowance reset',desc:'Your 2 Kg weekly allowance has been reset.',t:'Monday · 12:00 AM',unread:false},
+  {cat:'Subscription',icon:'wallet',cls:'amber',title:'Subscription recharged',desc:'Type 1 · ₹2,000 activated successfully.',t:'05 Aug · 9:22 AM',unread:false}],
+ subHistory:[{t:'Type 1',d:'05 Aug 2026',a:2000},{t:'Type 1',d:'05 Jul 2026',a:2000},{t:'Type 1',d:'05 Jun 2026',a:2000},{t:'Type 1',d:'05 May 2026',a:2000},{t:'Type 1',d:'05 Jan 2026',a:2000}],
+ eta:18, seq:126
+};
+function calc(fish,qty){
+  const rem=S.sub.active?Math.max(0,S.sub.allow-S.sub.used):0;
+  const covered=Math.min(qty,rem), extra=+(qty-covered).toFixed(2);
+  return {covered:+covered.toFixed(2),extra,creditUse:Math.round(covered*fish.price),pay:Math.round(extra*fish.price),rem:+rem.toFixed(2)};
+}
+const stTag=f=>f.status==='available'?'<span class="tag ok ftag">● AVAILABLE TODAY</span>':f.status==='coming'?'<span class="tag warn ftag">◷ COMING TODAY</span>':'<span class="tag off ftag">✕ OUT OF STOCK</span>';
+
+/* ============================== portal switcher ============================== */
+function setPortal(p){
+  $$('#pbar nav button').forEach(b=>b.classList.toggle('on',b.textContent.toLowerCase()===p));
+  $$('.portal').forEach(s=>s.classList.add('hidden'));
+  $('#pt-'+p).classList.remove('hidden');
+  window.scrollTo({top:0});
+}
+function goCustomer(){setPortal('customer');if(!S.loggedIn){$('#cAuth').classList.remove('hidden');$('#cApp').classList.add('hidden')}}
+
+/* ============================== landing ============================== */
+function buildTicker(){
+  const items=['<b>ROHU</b> 18 KG — ARRIVED 07:40','<b>KATLA</b> 12 KG — ARRIVED 07:40','<b>TILAPIA</b> 14 KG — ARRIVED 07:52','<b>MURREL</b> 6 KG — <i>ON TRUCK · ETA '+S.eta+' MIN</i>','<b>VANNAMEI</b> 8 KG — ARRIVED 07:52','<b>POMFRET</b> 5 KG — ARRIVED 08:05','NEXT TRUCK: TOMORROW 06:00'];
+  const half='<span>'+items.map(i=>i+' <i>◆</i>').join(' ')+'</span>';
+  $('#tickerTrack').innerHTML=half+half;
+}
+function renderLandingFish(){
+  $('#lndFish').innerHTML=FISH.map(f=>`
+   <div class="fcard" onclick="goCustomer()">
+     <div class="fart-wrap">${stTag(f)}${fishArt(f)}</div>
+     <div class="fbody"><h4>${f.name}</h4><p class="fcat">${f.cat} · ${f.farm.split(',')[1]||''}</p>
+     <div class="frow"><span class="fprice">${money(f.price)}<small> /Kg</small></span><span class="btn linky">Reserve →</span></div></div>
+   </div>`).join('');
+}
+function buildWhy(){
+  const items=[['clock','Fresh fish every day','One truck, one arrival — stock is never carried over to the next day.'],
+  ['pin','Direct from organic farms','No middlemen. We buy at the pond in Warangal and Pulicat.'],
+  ['truck','Live delivery tracking','Watch the truck move from farm to store, with a real ETA.'],
+  ['wallet','Quantity-first subscriptions','2 or 3 Kg a week, covered by your plan. No price juggling.'],
+  ['qr','QR-based pickup','Book ahead, show your code, walk out with fish prepped.'],
+  ['chart','Transparent pricing','The price per kilo you see is the price you pay. Always.']];
+  $('#whyGrid').innerHTML=items.map(i=>`<div class="why-item"><span class="wi-ic">${I(i[0])}</span><div><h4>${i[1]}</h4><p>${i[2]}</p></div></div>`).join('');
+}
+
+/* ============================== auth ============================== */
+function authGo(n){[1,2,3].forEach(i=>{ $('#authStep'+i).classList.toggle('hidden',i!==n); $('#sb'+i).classList.toggle('on',i<=n)})}
+function sendOtp(){const ph=$('#phInput').value.trim();if(ph.length<10)return toast('Enter a valid mobile number','x');$('#otpPhone').textContent=ph;authGo(2);setTimeout(()=>$('.otpbox').focus(),120)}
+$$('.otpbox').forEach((b,i,arr)=>{b.addEventListener('input',()=>{b.value=b.value.replace(/\D/g,'');if(b.value&&arr[i+1])arr[i+1].focus()});b.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!b.value&&arr[i-1])arr[i-1].focus()})});
+function verifyOtp(){
+  const code=[...$$('.otpbox')].map(b=>b.value).join('');
+  if(code==='4321'){authGo(3)}else{const r=$('.otp-row');r.classList.remove('shake');void r.offsetWidth;r.classList.add('shake');toast('Incorrect OTP — try 4321','x')}
+}
+function finishProfile(){
+  S.user.name=$('#pfName').value||S.user.name;S.user.age=$('#pfAge').value;S.user.area=$('#pfArea').value;
+  login(true);
+}
+function login(fresh){
+  S.loggedIn=true;$('#cAuth').classList.add('hidden');$('#cApp').classList.remove('hidden');
+  $('#cnUser').textContent=S.user.first;
+  renderAll();cView('home');
+  toast(fresh?'Account created — welcome to PondFish!':'Welcome back, '+S.user.first,'fish');
+}
+function logout(){S.loggedIn=false;$('#cApp').classList.add('hidden');$('#cAuth').classList.remove('hidden');authGo(1);toast('Logged out','out')}
+
+/* ============================== customer shell ============================== */
+const TITLES={home:'Home',market:'Fish Marketplace',detail:'Fish Details',book:'Booking',checkout:'Checkout',ticket:'QR Ticket',sub:'Subscription',notif:'Notifications',history:'Booking History',profile:'Profile',settings:'Settings'};
+const NAVMAP={home:'home',market:'market',detail:'market',book:'market',checkout:'market',ticket:'bookings',sub:'sub',notif:'notif',history:'bookings',profile:'profile',settings:'settings'};
+function cView(v){
+  $$('#cApp .view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+  $('#cTitle').textContent=TITLES[v];
+  $('#cCrumb').textContent='CUSTOMER PORTAL · '+(v==='ticket'?'BOOKING JOURNEY':v.toUpperCase());
+  const nav=NAVMAP[v];
+  $$('#cApp [data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===nav));
+  window.scrollTo({top:0});
+}
+
+/* ============================== home ============================== */
+function renderHome(){
+  const h=new Date().getHours();
+  $('#hGreet').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+', '+S.user.first;
+  const rem=Math.max(0,S.sub.allow-S.sub.used);
+  $('#hCredit').textContent=money(S.sub.credit);
+  $('#hCreditCard').classList.toggle('warn',S.sub.credit<=0);
+  $('#hCreditNote').textContent=S.sub.credit<=0?'Recharge required to use plan benefits':'Prepaid credit · auto-deducted at booking';
+  $('#hAllow').textContent=kg(rem)+' left';
+  $('#hAllowBar').style.width=(S.sub.used/S.sub.allow*100)+'%';
+  $('#hAllowSub').textContent=(Math.round(S.sub.used*10)/10)+' of '+S.sub.allow+' Kg used · resets '+S.sub.reset;
+  $('#hBookId').textContent=S.activeBooking?S.activeBooking.id:'—';
+  $('#hFish').innerHTML=FISH.filter(f=>f.status==='available').slice(0,4).map(f=>`
+    <div class="hf-it" onclick="openFish('${f.id}')">
+      <span class="thumb">${fishArt(f)}</span>
+      <div><b>${f.name}</b><small>${f.cat} · ${kg(f.stock)} left</small></div>
+      <span class="pr">${money(f.price)}</span>
+    </div>`).join('');
+  const ab=S.activeBooking;
+  $('.hb-body').innerHTML=ab?`
+    <div class="qrmini"><canvas id="qrMini" width="52" height="52"></canvas></div>
+    <div style="flex:1"><b style="font-size:14.5px">${ab.fish} · ${kg(ab.qty)}</b>
+    <small style="display:block;color:var(--mut);font-size:12px" class="mono">${ab.id} · ${ab.time}</small>
+    <button class="btn sm" style="margin-top:9px" onclick="openTicket(S.activeBooking)">View QR ticket</button></div>`
+    :'<p style="color:var(--mut);font-size:13.5px">No active booking. Browse today\'s fish to make one.</p>';
+  if(ab)drawQR($('#qrMini'),ab.id);
+  $('#hNotifs').innerHTML=S.notifs.slice(0,3).map(n=>`<div class="nt-it ${n.unread?'unread':''}">${I(n.icon)}<div><b>${n.title}</b><small>${n.t}</small></div></div>`).join('');
+}
+
+/* ============================== marketplace ============================== */
+const MF={q:'',cat:'All',avail:'today'};
+function renderMktCats(){
+  const cats=['All','Freshwater','Marine','Shellfish'];
+  $('#mktCats').innerHTML=cats.map(c=>`<button class="chip ${MF.cat===c?'on':''}" onclick="MF.cat='${c}';renderMktCats();renderMarketplace()">${c}</button>`).join('');
+}
+function renderMarketplace(){
+  let list=FISH.filter(f=>(MF.cat==='All'||f.cat===MF.cat)&&f.name.toLowerCase().includes(MF.q.toLowerCase()));
+  if(MF.avail==='today')list=list.filter(f=>f.status==='available');
+  $('#mktGrid').innerHTML=list.length?list.map(f=>`
+   <div class="fcard" onclick="openFish('${f.id}')">
+     <div class="fart-wrap">${stTag(f)}${fishArt(f)}</div>
+     <div class="fbody"><h4>${f.name}</h4><p class="fcat">${f.cat} · ${f.status==='available'?kg(f.stock)+' in stock':'—'}</p>
+     <div class="frow"><span class="fprice">${money(f.price)}<small> /Kg</small></span><button class="btn sm ghost">View details</button></div></div>
+   </div>`).join('')
+  :`<div class="empty" style="grid-column:1/-1">${I('fish')}<p><b>No fresh fish matching your filters.</b><br>Try another search, or enable notifications to hear when stock lands.</p></div>`;
+}
+
+/* ============================== fish detail ============================== */
+let curFish=null;
+function openFish(id){curFish=FISH.find(f=>f.id===id);renderDetail();cView('detail')}
+function renderDetail(){
+  const f=curFish,rem=S.sub.active?Math.max(0,S.sub.allow-S.sub.used):0;
+  $('#dtlBox').innerHTML=`
+  <button class="btn linky" style="margin-bottom:14px" onclick="cView('market')">← Back to marketplace</button>
+  <div class="dtl">
+    <div class="dtl-art">${stTag(f)}${fishArt(f)}</div>
+    <div class="dtl-info">
+      <span class="tag teal">${f.cat.toUpperCase()}</span>
+      <h2>${f.name}</h2>
+      <p style="color:var(--ink2)">${f.desc}</p>
+      <div class="dtl-price">${money(f.price)}<small> / Kilogram</small></div>
+      <div class="info-rows">
+        <div><span>Availability</span><b>${f.status==='available'?'Available today · '+kg(f.stock)+' left':f.status==='coming'?'Coming today — on the truck':'Out of stock'}</b></div>
+        <div><span>Freshness</span><b>${f.status==='available'?'Arrived today · 07:40 AM':'Awaiting arrival'}</b></div>
+        <div><span>Source</span><b>${f.farm}</b></div>
+        <div><span>Pickup</span><b>PondFish Store, Uppal</b></div>
+      </div>
+      ${S.sub.active?`
+      <div class="subbox"><h5>${I('wallet')} YOUR SUBSCRIPTION · ${S.sub.type.toUpperCase()}</h5>
+        <div class="sb-row"><span>Weekly allowance</span><b>${S.sub.allow} Kg</b></div>
+        <div class="sb-row"><span>Remaining this week</span><b>${kg(rem)}</b></div>
+        <div class="sb-row"><span>Subscription balance</span><b>${money(S.sub.credit)}</b></div>
+      </div>`:`
+      <div class="subbox"><h5>${I('wallet')} NO ACTIVE SUBSCRIPTION</h5>
+        <p style="font-size:13px;color:var(--ink2)">You can still book — the full amount is paid at checkout. Or grab a plan for weekly benefits.</p>
+        <button class="btn linky" style="margin-top:8px" onclick="cView('sub')">View subscription plans →</button>
+      </div>`}
+      <div class="note-line">${I('clock')}<span>If your quantity exceeds your remaining weekly allowance, the extra is charged per Kg at checkout via Razorpay.</span></div>
+      <button class="btn block" ${f.status!=='available'?'disabled':''} onclick="startBooking()">${f.status==='available'?'Buy now →':'Unavailable'}</button>
+    </div>
+  </div>`;
+}
+
+/* ============================== booking ============================== */
+function startBooking(){S.draft={fish:curFish,qty:1};renderBook();cView('book')}
+function adjQty(d){
+  const f=S.draft.fish;
+  S.draft.qty=Math.min(f.stock,Math.max(.5,+(S.draft.qty+d).toFixed(1)));
+  renderBook();
+}
+function renderBook(){
+  const f=S.draft.fish,q=S.draft.qty,c=calc(f,q);
+  $('#bkBox').innerHTML=`
+  <button class="btn linky" onclick="openFish('${f.id}')">← Change fish</button>
+  <div class="card bk-fish">
+    <span class="thumb">${fishArt(f)}</span>
+    <div><b style="font:600 18px var(--disp)">${f.name}</b><small style="display:block;color:var(--mut)">${f.cat} · ${money(f.price)}/Kg · ${kg(f.stock)} in stock</small></div>
+    <span class="tag ok" style="margin-left:auto">TODAY</span>
+  </div>
+  <div class="card qty-card" style="text-align:center">
+    <span style="font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)">Quantity to reserve</span>
+    <div class="stepper">
+      <button onclick="adjQty(-0.5)" aria-label="decrease">−</button>
+      <span class="qv">${q}<small> Kg</small></span>
+      <button onclick="adjQty(0.5)" aria-label="increase">+</button>
+    </div>
+    <small style="color:var(--mut)">Step 0.5 Kg · max ${kg(f.stock)} available</small>
+  </div>
+  <div class="card sum-card">
+    <div class="sum-row"><span>Selected quantity</span><b>${kg(q)}</b></div>
+    <div class="sum-row"><span>Covered by subscription ${S.sub.active?'('+S.sub.type+')':'— no plan'}</span><b>${S.sub.active?kg(c.covered):'0 Kg'}</b></div>
+    <div class="sum-row"><span>Additional quantity</span><b>${kg(c.extra)}</b></div>
+    <div class="sum-row tot ${c.pay>0?'pay':''}"><span>Estimated payment</span><b>${money(c.pay)}</b></div>
+  </div>
+  ${S.sub.active&&q>c.rem?`<div class="note-line">${I('wallet')}<span>${kg(c.extra)} exceeds your remaining allowance and will be paid via Razorpay at checkout.</span></div>`:''}
+  <button class="btn block" onclick="renderCheckout();cView('checkout')">Continue to checkout →</button>`;
+}
+
+/* ============================== checkout ============================== */
+let ckOk={a:false,b:false};
+function renderCheckout(){
+  const f=S.draft.fish,q=S.draft.qty,c=calc(f,q);ckOk={a:false,b:false};
+  $('#ckBox').innerHTML=`
+  <button class="btn linky" onclick="renderBook();cView('book')">← Back to booking</button>
+  <div class="card sum-card">
+    <div class="sum-row"><span>${f.name} · ${money(f.price)}/Kg</span><b>${kg(q)}</b></div>
+    <div class="sum-row"><span>Covered by subscription</span><b>${S.sub.active?kg(c.covered):'—'}</b></div>
+    <div class="sum-row"><span>Payable quantity</span><b>${kg(c.extra)}</b></div>
+    <div class="sum-row tot ${c.pay>0?'pay':''}"><span>Payable amount</span><b>${money(c.pay)}</b></div>
+    ${S.sub.active?`<div class="sum-row" style="border-top:1px dashed var(--line)"><span>Subscription credit after booking</span><b>${money(Math.max(0,S.sub.credit-c.creditUse))}</b></div>`:''}
+  </div>
+  <div class="card" style="padding:18px 22px">
+    <div style="display:flex;gap:12px;align-items:center">${I('pin')}<div><b style="font-size:14px">Pickup — PondFish Store</b><small style="display:block;color:var(--mut);font-size:12.5px">12/4 Fish Market Road, Uppal, Hyderabad · today, 6 AM – 9 PM</small></div><span class="tag teal" style="margin-left:auto">STORE PICKUP</span></div>
+  </div>
+  <div class="card ck-terms">
+    <label class="ck"><input type="checkbox" onchange="ckOk.a=this.checked;ckGate()"><span>I confirm my booking details.</span></label>
+    <label class="ck"><input type="checkbox" onchange="ckOk.b=this.checked;ckGate()"><span>I understand my fish will be prepared after QR verification at the store.</span></label>
+  </div>
+  <button class="btn block" id="ckBtn" disabled onclick="confirmBooking()">${c.pay>0?'Pay '+money(c.pay)+' & confirm booking':'Confirm booking'}</button>
+  <p style="text-align:center;font-size:11.5px;color:var(--mut);margin-top:10px">${c.pay>0?'Secured by Razorpay · booking created only after successful payment':'Fully covered by your subscription · no payment needed'}</p>`;
+}
+function ckGate(){$('#ckBtn').disabled=!(ckOk.a&&ckOk.b)}
+function confirmBooking(){
+  const f=S.draft.fish,q=S.draft.qty,c=calc(f,q);
+  if(c.pay>0){razorpay(c.pay,()=>finalize(f,q,c))}else{finalize(f,q,c)}
+}
+function finalize(f,q,c){
+  S.seq++;const id='PF-20260807-00'+S.seq;
+  const b={id,fish:f.name,qty:q,date:'07 Aug 2026',time:new Date().toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}),covered:c.covered,paid:c.extra,amt:c.pay,status:'Active'};
+  S.history.unshift(b);S.activeBooking=b;f.stock=+(f.stock-q).toFixed(1);
+  if(S.sub.active){S.sub.used=Math.min(S.sub.allow,+(S.sub.used+c.covered).toFixed(1));S.sub.credit=Math.max(0,S.sub.credit-c.creditUse)}
+  S.notifs.unshift({cat:'Booking',icon:'qr',cls:'',title:'Booking confirmed',desc:id+' · '+f.name+' '+kg(q),t:'Just now',unread:true});
+  S.draft={fish:null,qty:1};
+  renderAll();openTicket(b);
+  toast('Booking confirmed — see you at the store!','qr');
+}
+function openTicket(b){renderTicket(b);cView('ticket')}
+function renderTicket(b){
+  const f=FISH.find(x=>x.name===b.fish)||FISH[0];
+  $('#tkBox').innerHTML=`
+  <div class="succ"><div class="okc">${I('check')}</div><h2>Booking confirmed</h2><p>Your fish is reserved. Show this ticket at the counter.</p></div>
+  <div class="ticket">
+    <div class="t-qr"><canvas id="qrT" width="170" height="170"></canvas></div>
+    <p class="t-id">${b.id}</p>
+    <p class="t-live"><span class="live"></span>Live ticket · verified by staff scan</p>
+    <div class="perf"></div>
+    <div class="kv2"><span>Fish</span><b>${b.fish}</b></div>
+    <div class="kv2"><span>Quantity</span><b>${kg(b.qty)}</b></div>
+    <div class="kv2"><span>Covered by ${S.sub.active?S.sub.type:'plan'}</span><b>${kg(b.covered)}</b></div>
+    <div class="kv2"><span>Paid via Razorpay</span><b>${b.amt>0?money(b.amt):'—'}</b></div>
+    <div class="kv2"><span>Booked</span><b>${b.date} · ${b.time}</b></div>
+    <div class="kv2"><span>Pickup</span><b>PondFish Store, Uppal</b></div>
+    <div class="t-instr">${I('qr')}<span>Please visit the PondFish store and show this QR code to the worker. Your fish is prepared fresh after scanning.</span></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:18px">
+    <button class="btn block ghost" onclick="cView('history')">Booking history</button>
+    <button class="btn block" onclick="cView('home')">Return home</button>
+  </div>`;
+  drawQR($('#qrT'),b.id);
+}
+
+/* ============================== razorpay (simulated) ============================== */
+let rzCb=null;
+function razorpay(amount,cb){
+  rzCb=cb;
+  modal(`
+  <div style="background:#0B2B5B;color:#fff;border-radius:12px 12px 0 0;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;margin:-26px -26px 20px">
+    <div><b style="font-size:16px">PondFish</b><small style="display:block;opacity:.7;font-size:11.5px">Fresh fish retail · Hyderabad</small></div>
+    <b class="mono" style="font-size:18px">${money(amount)}</b>
+  </div>
+  <div style="display:grid;gap:9px;margin-bottom:18px">
+    <div style="display:flex;gap:12px;align-items:center;border:1.5px solid var(--teal);border-radius:10px;padding:13px 15px;background:var(--teal-x)">${I('phone')}<div style="flex:1"><b style="font-size:13.5px">UPI</b><small style="display:block;color:var(--mut);font-size:12px">stevan@okhdfcbank</small></div><span style="width:16px;height:16px;border-radius:50%;border:5px solid var(--teal)"></span></div>
+    <div style="display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:13px 15px;opacity:.75">${I('wallet')}<div><b style="font-size:13.5px">Netbanking</b><small style="display:block;color:var(--mut);font-size:12px">All major banks</small></div></div>
+    <div style="display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:13px 15px;opacity:.75">${I('doc')}<div><b style="font-size:13.5px">Credit / Debit card</b><small style="display:block;color:var(--mut);font-size:12px">Visa · Mastercard · RuPay</small></div></div>
+  </div>
+  <button class="btn block" id="rzBtn" onclick="rzGo()">Pay ${money(amount)}</button>
+  <p style="text-align:center;font-size:11px;color:var(--mut);margin-top:12px">🔒 Secured by Razorpay · demo payment — no money moves</p>`);
+}
+function rzGo(){
+  const b=$('#rzBtn');b.disabled=true;b.innerHTML='<span class="spin"></span>&nbsp;Processing…';
+  setTimeout(()=>{b.classList.add('okbtn');b.innerHTML=I('check')+' Payment successful';
+    setTimeout(()=>{closeModal();const cb=rzCb;rzCb=null;cb&&cb()},950);
+  },1500);
+}
+
+/* ============================== subscription ============================== */
+function renderSub(){
+  const rem=Math.max(0,S.sub.allow-S.sub.used);
+  const health=S.sub.credit<=0?['🔴','Subscription exhausted — recharge required','g']:rem<0.5?['🟡','Low weekly allowance left','g']:['🟢','Subscription healthy','g'];
+  $('#subBox').innerHTML=`
+  <div class="sub-health g"><span style="font-size:18px">${health[0]}</span>${health[1]}<span class="tag ok" style="margin-left:auto">ACTIVE</span></div>
+  <div class="sub-grid">
+    <div class="card sg-card"><h5>Current plan</h5><div class="big">${S.sub.type}</div><small style="color:var(--mut)">${money(S.sub.fee)} / month · up to ${S.sub.allow} Kg weekly</small>
+      <div class="meter" style="margin-top:14px"><i style="width:${S.sub.used/S.sub.allow*100}%"></i></div>
+      <small style="color:var(--mut);display:block;margin-top:7px">${kg(S.sub.used)} used this week · resets ${S.sub.reset}</small></div>
+    <div class="card sg-card"><h5>Subscription credit</h5><div class="big mono">${money(S.sub.credit)}</div><small style="color:var(--mut)">Prepaid balance, auto-deducted on bookings</small>
+      <button class="btn sm" style="margin-top:14px" onclick="recharge(0)">${S.sub.credit<=0?'Recharge now':'Top up'} ₹2,000</button></div>
+  </div>
+  <div class="card" style="padding:20px;margin-bottom:18px">
+    <h5 style="font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:14px">Switch or recharge plan</h5>
+    <div class="plan-mini"><div><h4>Type 1</h4><small>₹2,000 / month · 2 Kg weekly</small></div><button class="btn sm ${S.sub.type==='Type 1'?'ghost':''}" onclick="recharge(0)">${S.sub.type==='Type 1'?'Recharge':'Switch'}</button></div>
+    <div class="plan-mini"><div><h4>Type 2</h4><small>₹6,000 / month · 3 Kg weekly</small></div><button class="btn sm coral" onclick="recharge(1)">Upgrade</button></div>
+  </div>
+  <div class="card" style="padding:20px">
+    <h5 style="font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:10px">Subscription history</h5>
+    ${S.subHistory.map(h=>`<div class="kv2"><span>${h.t} · ${h.d}</span><b class="mono">${money(h.a)} <span class="tag ok" style="margin-left:8px">COMPLETED</span></b></div>`).join('')}
+  </div>`;
+}
+const PLANS=[{name:'Type 1',fee:2000,kg:2},{name:'Type 2',fee:6000,kg:3}];
+function recharge(i){
+  const p=PLANS[i];
+  razorpay(p.fee,()=>{
+    S.sub.active=true;S.sub.type=p.name;S.sub.fee=p.fee;S.sub.allow=p.kg;S.sub.credit+=p.fee;
+    S.subHistory.unshift({t:p.name,d:'07 Aug 2026',a:p.fee});
+    S.notifs.unshift({cat:'Subscription',icon:'wallet',cls:'amber',title:'Subscription recharged',desc:p.name+' · '+money(p.fee)+' activated successfully.',t:'Just now',unread:true});
+    renderAll();toast(p.name+' activated — '+money(p.fee)+' credit added','wallet');
+  });
+}
+
+/* ============================== notifications ============================== */
+let NF='All';
+function renderNfCats(){
+  $('#nfCats').innerHTML=['All','Bookings','Subscriptions','Delivery'].map(c=>`<button class="chip ${NF===c?'on':''}" onclick="NF='${c}';renderNfCats();renderNotifs()">${c}</button>`).join('');
+}
+function nfMatch(n){
+  if(NF==='All')return true;
+  if(NF==='Bookings')return n.cat==='Booking';
+  if(NF==='Subscriptions')return n.cat==='Subscription';
+  return n.cat==='Delivery';
+}
+function renderNotifs(){
+  const list=S.notifs.filter(nfMatch);
+  $('#nfList').innerHTML=list.length?list.map(n=>`
+   <div class="nf-it ${n.cls}"><span class="nf-ic">${I(n.icon)}</span>
+   <div style="flex:1"><b>${n.title}</b><p>${n.desc}</p><small>${n.t} · ${n.cat}</small></div>
+   ${n.unread?'<span class="udot"></span>':''}</div>`).join('')
+  :`<div class="empty card">${I('bell')}<p><b>You're all caught up.</b><br>No notifications in this category.</p></div>`;
+  const un=S.notifs.filter(n=>n.unread).length;
+  $('#nfBadge').textContent=un;$('#nfBadge').style.display=un?'grid':'none';
+  $('#bellDot').style.display=un?'block':'none';
+}
+function markAllRead(){S.notifs.forEach(n=>n.unread=false);renderNotifs();renderHome();toast('All notifications marked as read','check')}
+
+/* ============================== history ============================== */
+let HF='All';
+function renderHsFilters(){
+  $('#hsFilters').innerHTML=['All','Active','Completed','Paid via Razorpay','Fully covered'].map(c=>`<button class="chip ${HF===c?'on':''}" onclick="HF='${c}';renderHsFilters();renderHistory()">${c}</button>`).join('');
+}
+function hsMatch(b){
+  if(HF==='All')return true;
+  if(HF==='Active')return b.status==='Active';
+  if(HF==='Completed')return b.status==='Completed';
+  if(HF==='Paid via Razorpay')return b.amt>0;
+  return b.amt===0;
+}
+function renderHistory(){
+  const list=S.history.filter(hsMatch);
+  $('#histList').innerHTML=list.length?list.map((b,i)=>`
+  <div class="hist-row" id="hr-${i}">
+    <button class="hist-top" onclick="document.getElementById('hr-${i}').classList.toggle('open')">
+      <div><span class="mono">${b.id}</span><b style="display:block">${b.fish} · ${kg(b.qty)}</b></div>
+      <div class="rt"><div><small style="color:var(--mut);font-size:12px;display:block">${b.date} · ${b.time}</small>
+      <span class="tag ${b.status==='Active'?'warn':'ok'}">${b.status.toUpperCase()}</span></div>${I('chev')}</div>
+    </button>
+    <div class="hist-det"><div class="hd-grid">
+      <div><span>Covered by plan</span><b>${kg(b.covered)}</b></div>
+      <div><span>Paid via Razorpay</span><b>${b.amt>0?money(b.amt):'—'}</b></div>
+      <div><span>Pickup</span><b>PondFish Store</b></div>
+      <div><span>${b.status==='Completed'?'Completed at':'Status'}</span><b>${b.done||'Awaiting pickup'}</b></div>
+    </div>
+    ${b.status==='Active'?`<button class="btn sm" style="margin-top:14px" onclick="openTicket(S.history[${i}])">View QR ticket</button>`:'<p style="margin-top:14px;font-size:12px;color:var(--mut)">QR ticket archived · already used</p>'}
+    </div>
+  </div>`).join('')
+  :`<div class="empty card">${I('qr')}<p><b>No bookings yet.</b><br>Browse today's fish to make your first booking.</p><button class="btn sm" style="margin-top:12px" onclick="cView('market')">Browse fish</button></div>`;
+}
+
+/* ============================== profile & settings ============================== */
+function renderProfile(){
+  const tot=S.history.length+14, totQ=(36.5).toFixed(1);
+  $('#profBox').innerHTML=`
+  <div class="card prof-head">
+    <div class="avatar">SA</div>
+    <div><h2>${S.user.name}</h2><span class="pid">${S.user.id} · MEMBER SINCE ${S.user.since.toUpperCase()}</span>
+    <div><span class="badge-m">🐟 PondFish Member · ${S.sub.type} · Active</span></div></div>
+  </div>
+  <div class="stat-row">
+    <div class="card stat"><b>${tot}</b><span>Total bookings</span></div>
+    <div class="card stat"><b>${totQ}</b><span>Kg of fish purchased</span></div>
+    <div class="card stat"><b>${S.subHistory.length}</b><span>Subscription purchases</span></div>
+    <div class="card stat"><b>${money(12840)}</b><span>Lifetime spending</span></div>
+  </div>
+  <div class="p-grid">
+    <div class="card pg-card"><h5>Personal information</h5>
+      <div class="kv"><span>Full name</span><b>${S.user.name}</b></div>
+      <div class="kv"><span>Mobile</span><b class="mono">${S.user.phone}</b></div>
+      <div class="kv"><span>Age</span><b>${S.user.age}</b></div>
+      <div class="kv"><span>Area</span><b>${S.user.area}</b></div>
+      <button class="btn sm ghost" style="margin-top:14px" onclick="toast('Profile editing (demo)','user')">Edit information</button>
+    </div>
+    <div class="card pg-card"><h5>Membership</h5>
+      <div class="kv"><span>Status</span><b><span class="tag ok">ACTIVE</span></b></div>
+      <div class="kv"><span>Current plan</span><b>${S.sub.type}</b></div>
+      <div class="kv"><span>Weekly allowance</span><b>${S.sub.allow} Kg</b></div>
+      <div class="kv"><span>Credit</span><b class="mono">${money(S.sub.credit)}</b></div>
+      <button class="btn sm" style="margin-top:14px" onclick="cView('sub')">Manage subscription</button>
+    </div>
+  </div>`;
+}
+function renderSettings(){
+  const rows=(title,items)=>`<div class="set-group"><h5>${title}</h5>${items.map(it=>`
+    <div class="set-row"><div style="flex:1"><b style="font-size:13.5px">${it[0]}</b>${it[1]?`<small>${it[1]}</small>`:''}</div>
+    ${it[2]==='sw'?`<button class="sw ${it[3]?'on':''}" onclick="this.classList.toggle('on');toast('Preference saved','check')"></button>`:`<span class="val">${it[2]}</span>`}</div>`).join('')}</div>`;
+  $('#setBox').innerHTML=
+   rows('Notifications',[['Live truck updates','Push when the truck departs & arrives','sw',true],
+   ['Booking notifications','Confirmations and pickup reminders','sw',true],
+   ['Subscription alerts','Allowance resets and recharge reminders','sw',true],
+   ['General announcements','Store news and offers','sw',false]])+
+   rows('Application',[['Language','','English'],['App version','','v1.0.0 (26)'],['About PondFish','','→']])+
+   rows('Support',[['Contact support','Usually replies within a few hours','→'],['Call store','+91 98480 22334','→'],['FAQs','','→']])+
+   rows('Account',[['Registered mobile',S.user.phone,'OTP ✓'],['Privacy policy','','→'],['Terms & conditions','','→']])+
+   `<button class="btn ghost block" onclick="logout()">${I('out')} Logout</button>`;
+}
+
+/* ============================== worker ============================== */
+const W={
+ pending:[
+  {id:'PF-20260807-00125',cust:'Stevan Antony',phone:'98480 12345',fish:'Rohu',qty:2,time:'11:42 AM',pay:'Covered by subscription · 2 Kg'},
+  {id:'PF-20260807-00126',cust:'Rahul Verma',phone:'98661 40987',fish:'Katla',qty:3,time:'11:48 AM',pay:'Razorpay ₹160 · verified'},
+  {id:'PF-20260807-00127',cust:'Kiran Kumar',phone:'90104 55621',fish:'Tilapia',qty:1,time:'11:55 AM',pay:'Covered by subscription · 1 Kg'},
+  {id:'PF-20260807-00128',cust:'Meena Iyer',phone:'98499 78120',fish:'Vannamei Prawns',qty:1.5,time:'12:03 PM',pay:'Razorpay ₹675 · verified'},
+  {id:'PF-20260807-00129',cust:'Arjun Rao',phone:'96525 34098',fish:'Rohu',qty:1,time:'12:10 PM',pay:'Razorpay ₹320 · verified'}],
+ done:[
+  {id:'PF-20260807-00124',cust:'Divya Nair',fish:'Pomfret',qty:1.5,time:'10:22 AM',done:'10:41 AM',pay:'Razorpay ₹780'},
+  {id:'PF-20260807-00119',cust:'Suresh Babu',fish:'Rohu',qty:2,time:'09:40 AM',done:'09:58 AM',pay:'Covered · Type 1'},
+  {id:'PF-20260807-00112',cust:'Lakshmi Priya',fish:'Tilapia',qty:2.5,time:'08:55 AM',done:'09:12 AM',pay:'Razorpay ₹600'}]
+};
+function wCounts(){
+  $('#wPending').textContent=W.pending.length;
+  $('#wDone').textContent=48-W.pending.length;
+}
+function wTab(t){
+  $$('.wtabs button').forEach(b=>b.classList.toggle('on',b.dataset.wt===t));
+  ['active','done','profile'].forEach(v=>$('#w-'+v).classList.toggle('hidden',v!==t));
+}
+function renderWList(){
+  const q=($('#wSearch').value||'').toLowerCase();
+  const list=W.pending.filter(o=>!q||o.id.toLowerCase().includes(q)||o.cust.toLowerCase().includes(q)||o.phone.includes(q));
+  $('#wList').innerHTML=list.length?list.map(o=>`
+   <button class="wrow" onclick="openOrder('${o.id}')">
+     <div><span class="wid">${o.id}</span><b>${o.cust}</b></div>
+     <div class="wfish"><b>${o.fish}</b><span>${kg(o.qty)}</span></div>
+     <span class="wt">${o.time}</span>${I('chev')}
+   </button>`).join('')
+  :`<div class="empty card">${I('check')}<p><b>${q?'No booking found.':'All caught up!'}</b><br>${q?'Check the booking ID, name or mobile number.':'No pending pickups right now.'}</p></div>`;
+  wCounts();
+}
+let curOrder=null;
+function openOrder(id){
+  curOrder=W.pending.find(o=>o.id===id);if(!curOrder)return toast('Booking not found','x');
+  $('#wSheetBody').innerHTML=`
+   <span class="tag warn" style="margin-bottom:14px">● AWAITING PICKUP</span>
+   <div class="kv2"><span>Booking ID</span><b class="mono">${curOrder.id}</b></div>
+   <div class="kv2"><span>Customer</span><b>${curOrder.cust}</b></div>
+   <div class="kv2"><span>Mobile</span><b class="mono">${curOrder.phone}</b></div>
+   <div class="kv2"><span>Fish</span><b>${curOrder.fish}</b></div>
+   <div class="kv2"><span>Quantity</span><b>${kg(curOrder.qty)}</b></div>
+   <div class="kv2"><span>Booked at</span><b class="mono">${curOrder.time}</b></div>
+   <div class="pay-ok">${I('check')} ${curOrder.pay}</div>
+   <p style="font-size:12px;color:var(--mut)">Payment is verified — do not collect money at the counter.</p>`;
+  $('#wSheetFoot').innerHTML=`<button class="btn block" onclick="askComplete()">${I('check')} Complete order</button>`;
+  $('#wSheet').classList.add('open');
+}
+function closeWSheet(){$('#wSheet').classList.remove('open')}
+function askComplete(){
+  modal(`<div style="text-align:center">
+   <div style="width:52px;height:52px;border-radius:50%;background:var(--amber-x);color:var(--amber);display:grid;place-items:center;margin:0 auto 14px">${I('check')}</div>
+   <h3 style="font:600 20px var(--disp);margin-bottom:6px">Complete this order?</h3>
+   <p style="color:var(--ink2);font-size:13.5px;margin-bottom:20px">This finalizes <b class="mono">${curOrder.id}</b>, invalidates the customer's QR ticket and sends them a notification.</p>
+   <div style="display:flex;gap:10px"><button class="btn ghost block" onclick="closeModal()">Cancel</button><button class="btn block" onclick="doComplete()">Complete order</button></div></div>`);
+}
+function doComplete(){
+  const o=curOrder;
+  W.pending=W.pending.filter(x=>x.id!==o.id);
+  W.done.unshift({...o,done:new Date().toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})});
+  closeModal();closeWSheet();renderWList();renderWDone();
+  toast(o.id+' completed · customer notified','check');
+}
+let WF='Today';
+function renderWDoneFilters(){
+  $('#wDoneFilters').innerHTML=['Today','Yesterday','This Week','This Month'].map(c=>`<button class="chip ${WF===c?'on':''}" onclick="WF='${c}';renderWDoneFilters();renderWDone()">${c}</button>`).join('');
+}
+function renderWDone(){
+  $('#wDoneList').innerHTML=W.done.length?W.done.map(o=>`
+   <div class="wrow" style="cursor:default">
+     <div><span class="wid">${o.id}</span><b>${o.cust}</b></div>
+     <div class="wfish"><b>${o.fish}</b><span>${kg(o.qty)}</span></div>
+     <div style="text-align:right;min-width:110px"><span class="tag ok">COMPLETED</span><small style="display:block;color:var(--mut);font-size:11px;margin-top:3px" class="mono">${o.done}</small></div>
+   </div>`).join(''):`<div class="empty card">${I('clock')}<p><b>No completed orders in this period.</b></p></div>`;
+}
+function scanQR(){
+  modal(`<h3 style="font:600 19px var(--disp);margin-bottom:4px">Scan booking QR</h3>
+  <p style="font-size:13px;color:var(--mut);margin-bottom:14px">Point the camera at the customer's ticket.</p>
+  <div class="scan-vp"><div class="scan-corner sc-tl"></div><div class="scan-corner sc-tr"></div><div class="scan-corner sc-bl"></div><div class="scan-corner sc-br"></div><div class="scan-line"></div></div>
+  <p style="text-align:center;font-size:12px;color:var(--mut)">Demo: detects <b class="mono">PF-20260807-00125</b> in a moment…</p>`);
+  setTimeout(()=>{closeModal();openOrder('PF-20260807-00125')},2300);
+}
+
+/* ============================== admin ============================== */
+const ATITLES={dash:'Dashboard',inv:'Fish Inventory',truck:'Live Truck Tracking',book:'Bookings',crm:'Customers (CRM)',subm:'Subscription Management',work:'Worker Management',notif:'Notifications',web:'Website Content',set:'Business Settings',rep:'Reports & Analytics',audit:'Audit Logs'};
+function aNav(v){
+  $$('.an-it').forEach(b=>b.classList.toggle('on',b.dataset.an===v));
+  $$('.aview').forEach(x=>x.classList.toggle('on',x.id==='a-'+v));
+  $('#aTitle').textContent=ATITLES[v];window.scrollTo({top:0});
+}
+function barsHTML(data){
+  return data.map(d=>`<div class="bar ${d.hot?'hot':''}" title="${d.v}"><i style="--h:${d.h}%"></i><span>${d.l}</span></div>`).join('');
+}
+const REV=[{l:'Fri',v:'₹8.2k',h:44},{l:'Sat',v:'₹11.4k',h:62},{l:'Sun',v:'₹14.1k',h:77},{l:'Mon',v:'₹9.8k',h:53},{l:'Tue',v:'₹12.6k',h:69},{l:'Wed',v:'₹16.9k',h:92},{l:'Thu',v:'₹18.2k',h:100,hot:true}];
+function renderAdminDash(){
+  const cards=[['qr','Today\'s bookings','48','17 pending pickup','book'],
+  ['wallet','Today\'s revenue',money(18240),'₹5,120 via subscriptions','rep'],
+  ['users','Active customers','132','on platform today','crm'],
+  ['truck','Live delivery','Active','ETA '+S.eta+' min · Kukatpally','truck']];
+  $('#aCards').innerHTML=cards.map(c=>`<button class="ac ${c[0]==='truck'?'hl':''}" onclick="aNav('${c[4]}')"><span>${I(c[0])}${c[1].toUpperCase()}</span><b>${c[2]}</b><small>${c[3]}</small></button>`).join('');
+  $('#revBars').innerHTML=barsHTML(REV);$('#repBars').innerHTML=barsHTML(REV);
+  $('#alertList').innerHTML=`
+   <button class="alert-it warn" onclick="aNav('inv')">${I('box')}<span><b>Rohu stock below threshold</b><small>10.5 Kg remaining · min is 12 Kg for a Friday</small></span></button>
+   <button class="alert-it warn" onclick="aNav('book')">${I('clock')}<span><b>5 bookings expire within 6 hours</b><small>Customers haven't picked up yet</small></span></button>
+   <button class="alert-it info" onclick="aNav('truck')">${I('truck')}<span><b>Live delivery in progress</b><small>ETA ${S.eta} min · published to 41 customers</small></span></button>`;
+  $('#feedList').innerHTML=`
+   <div class="feed-it coral"><span class="fdot"></span><div><b>Customer booked 2 Kg Rohu</b> · Stevan<small>2 minutes ago · PF-20260807-00125</small></div></div>
+   <div class="feed-it"><span class="fdot"></span><div><b>Worker completed booking</b> · Ramesh (WK-1008)<small>18 minutes ago · PF-20260807-00124</small></div></div>
+   <div class="feed-it"><span class="fdot"></span><div><b>Inventory updated</b> · Admin<small>34 minutes ago · Rohu 12 → 10.5 Kg</small></div></div>
+   <div class="feed-it coral"><span class="fdot"></span><div><b>Subscription recharged</b> · Type 1 ₹2,000<small>1 hour ago · Meena Iyer</small></div></div>
+   <div class="feed-it"><span class="fdot"></span><div><b>"Fresh fish arrived" push delivered</b> · 312 devices<small>Today · 8:15 AM</small></div></div>`;
+}
+let editingFish=null;
+function renderAdminInv(q=''){
+  const list=FISH.filter(f=>f.name.toLowerCase().includes(q.toLowerCase()));
+  const tot=FISH.reduce((a,f)=>a+f.stock,0);
+  $('#invStats').innerHTML=`
+   <div class="ac"><span>${I('fish')}FISH TYPES</span><b>${FISH.length}</b></div>
+   <div class="ac"><span>${I('box')}TOTAL STOCK</span><b>${Math.round(tot)} Kg</b></div>
+   <div class="ac"><span>${I('check')}AVAILABLE</span><b>${FISH.filter(f=>f.status==='available').length}</b></div>
+   <div class="ac"><span>${I('x')}UNAVAILABLE</span><b>${FISH.filter(f=>f.status!=='available').length}</b></div>`;
+  $('#invList').innerHTML=list.map(f=>`
+   <button class="inv-row" onclick="openInv('${f.id}')">
+     <span class="thumb">${fishArt(f)}</span>
+     <span class="nm"><b>${f.name}</b><small>${f.cat} · ${money(f.price)}/Kg</small></span>
+     <span class="stk"><small>${kg(f.stock)}</small><span class="meter ${f.stock<=2?'coral':''}" style="width:100px"><i style="width:${Math.min(100,f.stock/20*100)}%"></i></span></span>
+     <span class="rt">${stTag(f).replace('ftag','')}${I('chev')}</span>
+   </button>`).join('');
+}
+function openInv(id){
+  editingFish=FISH.find(f=>f.id===id);
+  $('#invSheetTitle').textContent='Edit — '+editingFish.name;
+  $('#invSheetBody').innerHTML=`
+   <div style="background:#EDF3ED;border-radius:12px;padding:16px;margin-bottom:18px">${fishArt(editingFish)}</div>
+   <div style="display:grid;gap:13px">
+     <div class="field"><label>Category</label><select id="invCat"><option ${editingFish.cat==='Freshwater'?'selected':''}>Freshwater</option><option ${editingFish.cat==='Marine'?'selected':''}>Marine</option><option ${editingFish.cat==='Shellfish'?'selected':''}>Shellfish</option></select></div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+       <div class="field"><label>Available quantity (Kg)</label><input type="number" id="invQty" step="0.5" value="${editingFish.stock}"></div>
+       <div class="field"><label>Price per Kg (₹)</label><input type="number" id="invPrice" value="${editingFish.price}"></div>
+     </div>
+     <div class="field"><label>Status</label><select id="invStatus"><option value="available" ${editingFish.status==='available'?'selected':''}>Available today</option><option value="coming" ${editingFish.status==='coming'?'selected':''}>Coming today</option><option value="out" ${editingFish.status==='out'?'selected':''}>Out of stock</option></select></div>
+     <div class="field"><label>Origin / farm</label><input type="text" id="invFarm" value="${editingFish.farm}"></div>
+   </div>`;
+  $('#invSheet').classList.add('open');
+}
+function closeInvSheet(){$('#invSheet').classList.remove('open')}
+function saveInv(){
+  editingFish.stock=+$('#invQty').value;editingFish.price=+$('#invPrice').value;
+  editingFish.status=$('#invStatus').value;editingFish.cat=$('#invCat').value;editingFish.farm=$('#invFarm').value;
+  if(editingFish.stock<=0.5&&editingFish.status==='available'){editingFish.status='out'}
+  closeInvSheet();renderAdminInv();renderMarketplace();renderLandingFish();renderHome();
+  toast(editingFish.name+' inventory updated','check');
+}
+function removeToday(){editingFish.status='out';saveInv()}
+function openAddFish(){
+  modal(`<h3 style="font:600 20px var(--disp);margin-bottom:16px">Add new fish</h3>
+  <form style="display:grid;gap:13px" onsubmit="event.preventDefault();addFish(this)">
+    <div class="field"><label>Fish name</label><input type="text" id="nfName" required placeholder="e.g. Wallago"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+      <div class="field"><label>Category</label><select id="nfCat"><option>Freshwater</option><option>Marine</option><option>Shellfish</option></select></div>
+      <div class="field"><label>Price / Kg (₹)</label><input type="number" id="nfPrice" value="300" required></div>
+    </div>
+    <div class="field"><label>Today's stock (Kg)</label><input type="number" id="nfStock" step="0.5" value="10"></div>
+    <button class="btn block" type="submit">Add to catalog</button>
+  </form>`);
+}
+function addFish(form){
+  const cols=[['#A7BFCC','#5F7E91'],['#B9C4A9','#77896B'],['#D9C3A5','#96774F'],['#F2B39C','#D96A45']];
+  const c=cols[Math.floor(Math.random()*cols.length)];
+  FISH.push({id:'f'+Date.now(),name:$('#nfName').value,cat:$('#nfCat').value,price:+$('#nfPrice').value,stock:+$('#nfStock').value,status:'available',farm:'Sri Lakshmi Organic Ponds, Warangal',desc:'Freshly added to the PondFish catalog.',c1:c[0],c2:c[1]});
+  closeModal();renderAdminInv();renderMarketplace();renderLandingFish();
+  toast('New fish added to the catalog','fish');
+}
+/* admin bookings */
+const AB=[
+ ['PF-20260807-00125','Stevan Antony','Rohu','2 Kg',2,'Pending'],
+ ['PF-20260807-00126','Rahul Verma','Katla','3 Kg',3,'Pending'],
+ ['PF-20260807-00121','Stevan Antony','Rohu','2 Kg',0,'Pending'],
+ ['PF-20260807-00128','Meena Iyer','Vannamei','1.5 Kg',1.5,'Pending'],
+ ['PF-20260807-00124','Divya Nair','Pomfret','1.5 Kg',3,'Completed'],
+ ['PF-20260807-00119','Suresh Babu','Rohu','2 Kg',0,'Completed'],
+ ['PF-20260807-00112','Lakshmi Priya','Tilapia','2.5 Kg',2.5,'Completed'],
+ ['PF-20260807-00108','Arjun Rao','Katla','1 Kg',1,'Completed']];
+let ABF='All';
+function renderAbFilters(){
+  $('#abFilters').innerHTML=['All','Pending','Completed'].map(c=>`<button class="chip ${ABF===c?'on':''}" onclick="ABF='${c}';renderAbFilters();renderAdminBookings()">${c}</button>`).join('');
+}
+function renderAdminBookings(){
+  const list=AB.filter(b=>ABF==='All'||b[5]===ABF);
+  $('#abTable').innerHTML=`<thead><tr><th>Booking</th><th>Customer</th><th>Fish</th><th>Qty</th><th>Payment</th><th>Status</th></tr></thead><tbody>`+
+   list.map(b=>`<tr><td class="mono">${b[0]}</td><td>${b[1]}</td><td>${b[2]}</td><td>${b[3]}</td><td>${b[4]>0?'<span class="tag teal">RAZORPAY '+money(b[4]*100===0?0:b[4])+'</span>':(b[4]===0?'<span class="tag ok">COVERED</span>':'')}</td><td><span class="tag ${b[5]==='Completed'?'ok':'warn'}">${b[5].toUpperCase()}</span></td></tr>`).join('')+'</tbody>';
+}
+/* truck controls */
+let published=true;
+function togglePublish(){
+  published=!published;
+  $('#pubBtn').textContent=published?'Pause customer visibility':'Publish to customers';
+  $('#pubState').textContent=published?'Published ✓':'Paused';
+  $('#pubState').style.color=published?'var(--ok)':'var(--amber)';
+  toast(published?'Live delivery published to customers':'Customer visibility paused','truck');
+}
+function markArrived(){
+  $('#truckProg').style.width='100%';$('#admTruck').style.left='100%';
+  $$('[data-eta]').forEach(e=>e.textContent='Arrived');
+  toast('Truck arrived — arrival alert sent to customers','check');
+}
+/* admin notif */
+function sendAdminNotif(form){
+  const t=$('#anTitle').value,b=$('#anBody').value;
+  $('#sentList').insertAdjacentHTML('afterbegin',`<div class="feed-it coral"><span class="fdot"></span><div><b>${t}</b><small>Just now · all customers · 486 devices</small></div></div>`);
+  form.reset();toast('Notification sent to 486 customers','send');
+}
+
+/* ============================== render all / init ============================== */
+function renderAll(){renderHome();renderMarketplace();renderSub();renderNotifs();renderHistory();renderProfile();renderSettings();renderLandingFish()}
+function init(){
+  hydrateIcons();
+  ['brandMark','brandMark2','authMark','cnMark','wMark','anMark'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=I('fish')});
+  $('#heroTruck').innerHTML=truckSVG;$$('[data-truck]').forEach(t=>t.innerHTML=truckSVG);$('#admTruck').innerHTML=truckSVG;
+  $('#ciPin').innerHTML=I('pin');$('#ciPh').innerHTML=I('phone');$('#ciMl').innerHTML=I('send');$('#ciCk').innerHTML=I('clock');
+  $('#playIco').innerHTML=I('arrow');$('#appleIco').innerHTML=I('arrow');
+  buildTicker();buildWhy();renderLandingFish();
+  renderMktCats();renderHome();renderSub();renderNfCats();renderNotifs();renderHsFilters();renderHistory();renderProfile();renderSettings();
+  renderWList();renderWDoneFilters();renderWDone();wCounts();
+  renderAdminDash();renderAdminInv();renderAbFilters();renderAdminBookings();
+  $('#sentList').innerHTML=`<div class="feed-it"><span class="fdot"></span><div><b>Fresh fish has arrived</b><small>Today · 8:15 AM · 312 devices</small></div></div><div class="feed-it"><span class="fdot"></span><div><b>Live delivery started — ETA 42 min</b><small>Today · 6:13 AM · 312 devices</small></div></div><div class="feed-it"><span class="fdot"></span><div><b>Weekly allowance reset</b><small>Monday · 12:00 AM · 87 subscribers</small></div></div>`;
+  drawQR($('#qr2'),'PONDFISH-APP-INSTALL');
+  /* ETA countdown */
+  setInterval(()=>{if(S.eta>2){S.eta--;$$('[data-eta]').forEach(e=>{if(e.textContent.indexOf('Arrived')<0)e.textContent=S.eta+' min'})}},45000);
+  /* scroll reveal */
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+  $$('.rev').forEach(el=>io.observe(el));
+}
+init();
+</script>
+</body>
+</html>
