@@ -29,14 +29,14 @@ export const QRTicket: React.FC<QRTicketProps> = ({ booking, onClose }) => {
     const grid = 12;
     const cell = sz / grid;
 
-    ctx.fillStyle = '#14312B';
+    ctx.fillStyle = '#003399';
 
     // Position detection corners
     const drawCorner = (x: number, y: number) => {
       ctx.fillRect(x * cell, y * cell, cell * 3, cell * 3);
       ctx.fillStyle = '#ffffff';
       ctx.fillRect((x + 0.5) * cell, (y + 0.5) * cell, cell * 2, cell * 2);
-      ctx.fillStyle = '#14312B';
+      ctx.fillStyle = '#003399';
       ctx.fillRect((x + 1) * cell, (y + 1) * cell, cell, cell);
     };
 

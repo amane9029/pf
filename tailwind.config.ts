@@ -1,38 +1,35 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
     extend: {
       colors: {
-        paper: "#F5F2EA",
-        card: "#FFFFFF",
-        ink: "#14312B",
-        ink2: "#45605A",
-        mut: "#84928B",
-        teal: {
-          DEFAULT: "#0C6B5D",
-          dark: "#0A5347",
-          light: "#E2EFEA",
-        },
-        coral: {
-          DEFAULT: "#E85D3A",
-          light: "#FBE9E2",
-        },
-        amber: {
-          DEFAULT: "#B57514",
-          light: "#F9EED8",
-        },
-        ok: {
-          DEFAULT: "#2E7D4F",
-          light: "#E3F1E7",
-        },
-        line: "#E4DECE",
-        line2: "#D3CBB5",
+        paper: '#F4F7FC',
+        card: '#FFFFFF',
+        ink: '#071A40',
+        ink2: '#3D5278',
+        mut: '#7084A8',
+        teal: '#003399',
+        'teal-d': '#002980',
+        'teal-x': '#E8EEFC',
+        coral: '#FF5500',
+        'coral-x': '#FFEFE8',
+        amber: '#D97706',
+        'amber-x': '#FEF3C7',
+        ok: '#16A34A',
+        'ok-x': '#DCFCE7',
+        line: '#E1E7F5',
+        line2: '#CCD7F0',
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        disp: ['Inter', 'sans-serif'],
+        mono: ['Inter', 'sans-serif'],
       },
     },
   },

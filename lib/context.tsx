@@ -95,12 +95,12 @@ interface PondFishContextType {
 }
 
 const INITIAL_FISH: FishItem[] = [
-  { id: 'f1', name: 'Rohu', cat: 'Freshwater', price: 320, stock: 10.5, status: 'available', farm: 'Warangal Organic Ponds', desc: 'Fresh daily harvest. Firm texture, perfect for traditional curries.', c1: '#A7BFCC', c2: '#5F7E91' },
-  { id: 'f2', name: 'Katla', cat: 'Freshwater', price: 340, stock: 18, status: 'available', farm: 'Godavari Basin Farm', desc: 'Large sweet-water fish. Rich in Omega-3 and vitamin B12.', c1: '#B9C4A9', c2: '#77896B' },
-  { id: 'f3', name: 'Vannamei Prawns', cat: 'Shellfish', price: 450, stock: 8, status: 'available', farm: 'Nellore Coastal Farm', desc: 'Cleaned, devined fresh prawns. Medium size, sweet natural flavor.', c1: '#F2B39C', c2: '#D96A45' },
-  { id: 'f4', name: 'Black Pomfret', cat: 'Marine', price: 780, stock: 4, status: 'available', farm: 'Kakinada Deep Sea', desc: 'Wild caught seawater pomfret. Premium delicacy, single bone structure.', c1: '#A5C1B8', c2: '#557A70' },
-  { id: 'f5', name: 'Tilapia', cat: 'Freshwater', price: 240, stock: 14, status: 'available', farm: 'Warangal Organic Ponds', desc: 'Mild flavor, lean white meat. Great for frying and grilling.', c1: '#D9C3A5', c2: '#96774F' },
-  { id: 'f6', name: 'Murrel (Korameenu)', cat: 'Freshwater', price: 620, stock: 0, status: 'coming', farm: 'Warangal Organic Ponds', desc: 'Highly prized freshwater delicacy. Arrival expected in truck.', c1: '#C1A7CC', c2: '#7A5B87' },
+  { id: 'f1', name: 'Rohu', cat: 'Freshwater', price: 320, stock: 10.5, status: 'available', farm: 'Warangal Organic Ponds', desc: 'Fresh daily harvest. Firm texture, perfect for traditional curries.', c1: '#4A72B8', c2: '#1E3A70' },
+  { id: 'f2', name: 'Katla', cat: 'Freshwater', price: 340, stock: 18, status: 'available', farm: 'Godavari Basin Farm', desc: 'Large sweet-water fish. Rich in Omega-3 and vitamin B12.', c1: '#3B82F6', c2: '#1D4ED8' },
+  { id: 'f3', name: 'Vannamei Prawns', cat: 'Shellfish', price: 450, stock: 8, status: 'available', farm: 'Nellore Coastal Farm', desc: 'Cleaned, devined fresh prawns. Medium size, sweet natural flavor.', c1: '#FF6B4A', c2: '#C23010' },
+  { id: 'f4', name: 'Black Pomfret', cat: 'Marine', price: 780, stock: 4, status: 'available', farm: 'Kakinada Deep Sea', desc: 'Wild caught seawater pomfret. Premium delicacy, single bone structure.', c1: '#2563EB', c2: '#1E40AF' },
+  { id: 'f5', name: 'Tilapia', cat: 'Freshwater', price: 240, stock: 14, status: 'available', farm: 'Warangal Organic Ponds', desc: 'Mild flavor, lean white meat. Great for frying and grilling.', c1: '#60A5FA', c2: '#2563EB' },
+  { id: 'f6', name: 'Murrel (Korameenu)', cat: 'Freshwater', price: 620, stock: 0, status: 'coming', farm: 'Warangal Organic Ponds', desc: 'Highly prized freshwater delicacy. Arrival expected in truck.', c1: '#818CF8', c2: '#4F46E5' },
 ];
 
 const INITIAL_NOTIFS: NotificationItem[] = [
@@ -350,10 +350,10 @@ export const PondFishProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addFishItem = (item: Omit<FishItem, 'id' | 'c1' | 'c2'>) => {
     const cols = [
-      ['#A7BFCC', '#5F7E91'],
-      ['#B9C4A9', '#77896B'],
-      ['#D9C3A5', '#96774F'],
-      ['#F2B39C', '#D96A45'],
+      ['#3B82F6', '#1D4ED8'],
+      ['#2563EB', '#1E40AF'],
+      ['#60A5FA', '#2563EB'],
+      ['#818CF8', '#4F46E5'],
     ];
     const c = cols[Math.floor(Math.random() * cols.length)];
     const newFish: FishItem = {
