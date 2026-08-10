@@ -10,7 +10,7 @@ import { TruckTrackerWidget } from '@/components/TruckTrackerWidget';
 import { AppQRCode } from '@/components/AppQRCode';
 
 export default function LandingPage() {
-  const { fishCatalog, showToast } = usePondFish();
+  const { fishCatalog, subPlans, showToast } = usePondFish();
   const router = useRouter();
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -206,6 +206,7 @@ export default function LandingPage() {
                 <img
                   src={selectedFish.image}
                   alt={selectedFish.name}
+                  referrerPolicy="no-referrer"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (
@@ -295,56 +296,26 @@ export default function LandingPage() {
           </div>
 
           <div className="plans">
-            <div className="plan">
-              <h3>Type 1 Subscription</h3>
-              <div className="plan-for">Ideal for small families (1-2 weekly meals)</div>
-              <div className="plan-price">
-                ₹2,000 <small>/ month</small>
+            {subPlans.map((plan) => (
+              <div key={plan.id} className={`plan ${plan.popular ? 'hot' : ''}`}>
+                {plan.popular && <span className="pl-tag">MOST POPULAR</span>}
+                <h3>{plan.name}</h3>
+                <div className="plan-for">{plan.desc}</div>
+                <div className="plan-price">
+                  ₹{plan.fee.toLocaleString('en-IN')} <small>/ month</small>
+                </div>
+                <ul>
+                  {plan.features.map((feat, i) => (
+                    <li key={i}>
+                      <Icon name="check" /> {feat}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/customer/subscription" className={`btn ${plan.popular ? 'coral' : 'ghost'} block`}>
+                  Select {plan.name}
+                </Link>
               </div>
-              <ul>
-                <li>
-                  <Icon name="check" /> Up to <b>2 Kg weekly</b> fish allowance
-                </li>
-                <li>
-                  <Icon name="check" /> Priority booking access before cutoff
-                </li>
-                <li>
-                  <Icon name="check" /> Express QR counter pickup
-                </li>
-                <li>
-                  <Icon name="check" /> Unused credit carries over to next week
-                </li>
-              </ul>
-              <Link href="/customer/subscription" className="btn ghost block">
-                Select Type 1
-              </Link>
-            </div>
-
-            <div className="plan hot">
-              <span className="pl-tag">MOST POPULAR</span>
-              <h3>Type 2 Subscription</h3>
-              <div className="plan-for">Ideal for seafood lovers & larger households</div>
-              <div className="plan-price">
-                ₹6,000 <small>/ month</small>
-              </div>
-              <ul>
-                <li>
-                  <Icon name="check" /> Up to <b>3 Kg weekly</b> premium fish allowance
-                </li>
-                <li>
-                  <Icon name="check" /> Access to high-demand marine species (Pomfret, Prawns)
-                </li>
-                <li>
-                  <Icon name="check" /> Free home delivery option (within 5 km)
-                </li>
-                <li>
-                  <Icon name="check" /> Dedicated customer support manager
-                </li>
-              </ul>
-              <Link href="/customer/subscription" className="btn coral block">
-                Subscribe Type 2
-              </Link>
-            </div>
+            ))}
           </div>
         </div>
       </section>

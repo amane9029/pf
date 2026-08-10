@@ -1098,64 +1098,100 @@ section.blk {
 }
 
 .plan {
-  border-radius: 16px;
-  padding: 30px;
+  border-radius: 14px;
+  padding: 18px 20px;
   border: 1px solid var(--line);
   background: #fff;
   transition: .22s;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .plan:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   box-shadow: var(--sh);
 }
 
 .plan.hot {
-  background: var(--ink);
-  color: #E2EBFB;
-  border-color: var(--ink);
+  background: linear-gradient(145deg, #04122C 0%, #0D2246 100%);
+  color: #F8FAFC;
+  border: 1.5px solid #1E3A8A;
+  box-shadow: 0 12px 28px -10px rgba(4, 18, 44, 0.4);
 }
 
 .plan.hot .plan-price, .plan.hot h3 {
-  color: #fff;
+  color: #FFFFFF !important;
 }
 
 .plan .pl-tag {
   position: absolute;
-  top: -11px;
-  right: 22px;
-  background: var(--teal);
-  color: #fff;
-  font: 600 11px 'Inter', sans-serif !important;
-  padding: 4px 11px;
+  top: -10px;
+  right: 16px;
+  background: linear-gradient(135deg, #FF5533 0%, #E03E1B 100%);
+  color: #ffffff;
+  font: 700 10px 'Inter', sans-serif !important;
+  letter-spacing: .06em;
+  padding: 3px 10px;
   border-radius: 99px;
+  box-shadow: 0 3px 10px rgba(255, 85, 51, 0.4);
+  z-index: 5;
 }
 
 .plan h3 {
-  font: 700 22px 'Inter', sans-serif !important;
-  margin-bottom: 4px;
+  font: 700 17px 'Inter', sans-serif !important;
+  margin-bottom: 2px;
 }
 
 .plan .plan-for {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink2);
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 
 .plan.hot .plan-for {
-  color: #A4C2FC;
+  color: #94A3B8 !important;
 }
 
 .plan-price {
-  font: 800 40px 'Inter', sans-serif !important;
+  font: 800 26px 'Inter', sans-serif !important;
   margin-bottom: 2px;
   color: var(--teal);
 }
 
+.plan.hot .plan-price {
+  color: #FFFFFF !important;
+}
+
 .plan-price small {
-  font: 500 14px 'Inter', sans-serif !important;
+  font: 500 12px 'Inter', sans-serif !important;
   color: var(--mut);
+}
+
+.plan.hot .plan-price small {
+  color: #94A3B8 !important;
+}
+
+.plan.hot .kv2 {
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.plan.hot .kv2 span {
+  color: #94A3B8 !important;
+}
+
+.plan.hot .kv2 b,
+.plan.hot .kv2 .mono {
+  color: #FFFFFF !important;
+}
+
+.plan.hot p {
+  color: #CBD5E1 !important;
+}
+
+.plan.hot .sec-label {
+  color: #38BDF8 !important;
 }
 
 .plan ul {
@@ -1172,6 +1208,10 @@ section.blk {
   align-items: center;
 }
 
+.plan.hot ul li {
+  color: #E2E8F0 !important;
+}
+
 .plan ul .ic {
   color: var(--teal);
   width: 16px;
@@ -1179,7 +1219,7 @@ section.blk {
 }
 
 .plan.hot ul .ic {
-  color: #6699FF;
+  color: #38BDF8 !important;
 }
 
 .appband {

@@ -5,7 +5,7 @@ import { usePondFish } from '@/lib/context';
 import { Icon } from '@/lib/icons';
 
 export default function CustomerSubscriptionPage() {
-  const { sub, subHistory, rechargeSub } = usePondFish();
+  const { sub, subPlans, subHistory, rechargeSub } = usePondFish();
 
   const rem = Math.max(0, sub.allow - sub.used);
 
@@ -56,28 +56,23 @@ export default function CustomerSubscriptionPage() {
           Switch or Upgrade Subscription Plan
         </h5>
 
-        <div className="plan-mini">
-          <div>
-            <h4>Type 1 Plan</h4>
-            <small>₹2,000 / month · 2 Kg weekly allowance</small>
-          </div>
-          <button
-            className={`btn sm ${sub.type === 'Type 1' ? 'ghost' : ''}`}
-            onClick={() => rechargeSub(0)}
-          >
-            {sub.type === 'Type 1' ? 'Recharge' : 'Switch'}
-          </button>
-        </div>
-
-        <div className="plan-mini">
-          <div>
-            <h4>Type 2 Plan</h4>
-            <small>₹6,000 / month · 3 Kg weekly allowance</small>
-          </div>
-          <button className="btn sm coral" onClick={() => rechargeSub(1)}>
-            Upgrade
-          </button>
-        </div>
+        {subPlans.map((p, idx) => {
+          const isCurrent = sub.type === p.name;
+          return (
+            <div key={p.id} className="plan-mini">
+              <div>
+                <h4>{p.name}</h4>
+                <small>₹{p.fee.toLocaleString('en-IN')} / month · {p.allow} Kg weekly allowance</small>
+              </div>
+              <button
+                className={`btn sm ${isCurrent ? 'ghost' : p.popular ? 'coral' : ''}`}
+                onClick={() => rechargeSub(idx)}
+              >
+                {isCurrent ? 'Recharge' : 'Switch Plan'}
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       <div className="card" style={{ padding: 20 }}>

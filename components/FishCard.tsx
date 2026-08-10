@@ -8,6 +8,15 @@ interface FishCardProps {
   onClick?: () => void;
 }
 
+const SPECIES_RAW_IMAGES: Record<string, string> = {
+  'Rohu': 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=800&q=85',
+  'Katla': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=800&q=85',
+  'Vannamei Prawns': 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=800&q=85',
+  'Black Pomfret': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=85',
+  'Tilapia': 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=800&q=85',
+  'Murrel (Korameenu)': 'https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=800&q=85',
+};
+
 export const FishCard: React.FC<FishCardProps> = ({ fish, onClick }) => {
   const [imgError, setImgError] = useState(false);
 
@@ -17,7 +26,8 @@ export const FishCard: React.FC<FishCardProps> = ({ fish, onClick }) => {
     return <span className="tag ok ftag">● FRESH ARRIVAL</span>;
   };
 
-  const hasImage = fish.image && !imgError;
+  const imageUrl = !imgError ? (SPECIES_RAW_IMAGES[fish.name] || fish.image) : null;
+  const hasImage = !!imageUrl;
 
   return (
     <div className="fcard" onClick={onClick}>
@@ -26,9 +36,10 @@ export const FishCard: React.FC<FishCardProps> = ({ fish, onClick }) => {
         {hasImage ? (
           <div className="fish-img-container">
             <img
-              src={fish.image}
+              src={imageUrl}
               alt={fish.name}
               className="fish-card-img"
+              referrerPolicy="no-referrer"
               onError={() => setImgError(true)}
               loading="lazy"
             />

@@ -53,6 +53,17 @@ export interface WorkerOrder {
   done?: string;
 }
 
+export interface SubPlan {
+  id: string;
+  name: string;
+  fee: number;
+  allow: number;
+  desc: string;
+  subscribers: number;
+  popular?: boolean;
+  features: string[];
+}
+
 interface PondFishContextType {
   user: {
     name: string;
@@ -75,6 +86,7 @@ interface PondFishContextType {
   eta: number;
   published: boolean;
   fishCatalog: FishItem[];
+  subPlans: SubPlan[];
   bookings: Booking[];
   notifs: NotificationItem[];
   workerPending: WorkerOrder[];
@@ -90,18 +102,52 @@ interface PondFishContextType {
   completeWorkerOrder: (orderId: string) => void;
   updateFishInventory: (fishId: string, updates: Partial<FishItem>) => void;
   addFishItem: (item: Omit<FishItem, 'id' | 'c1' | 'c2'>) => void;
+  updateSubPlan: (planId: string, updates: Partial<SubPlan>) => void;
+  addSubPlan: (plan: Omit<SubPlan, 'id' | 'subscribers'>) => void;
   togglePublishDelivery: () => void;
   markTruckArrived: () => void;
   markAllNotifsRead: () => void;
 }
 
+const INITIAL_SUB_PLANS: SubPlan[] = [
+  {
+    id: 'sp1',
+    name: 'Type 1 Plan',
+    fee: 2000,
+    allow: 2.0,
+    desc: 'Ideal for small families (1-2 weekly meals)',
+    subscribers: 87,
+    features: [
+      'Up to 2 Kg weekly fish allowance',
+      'Priority booking access before cutoff',
+      'Express QR counter pickup',
+      'Unused credit carries over to next week',
+    ],
+  },
+  {
+    id: 'sp2',
+    name: 'Type 2 Plan',
+    fee: 6000,
+    allow: 3.0,
+    desc: 'Ideal for seafood lovers & larger households',
+    subscribers: 34,
+    popular: true,
+    features: [
+      'Up to 3 Kg weekly premium fish allowance',
+      'Access to high-demand marine species (Pomfret, Prawns)',
+      'Free home delivery option (within 5 km)',
+      'Dedicated customer support manager',
+    ],
+  },
+];
+
 const INITIAL_FISH: FishItem[] = [
-  { id: 'f1', name: 'Rohu', cat: 'Freshwater', price: 320, stock: 10.5, status: 'available', farm: 'Warangal Organic Ponds', desc: 'Fresh daily harvest. Firm texture, perfect for traditional curries.', c1: '#4A72B8', c2: '#1E3A70', image: 'https://images.unsplash.com/photo-1534483509719-3feaee7c30da?auto=format&fit=crop&w=800&q=85' },
+  { id: 'f1', name: 'Rohu', cat: 'Freshwater', price: 320, stock: 10.5, status: 'available', farm: 'Warangal Organic Ponds', desc: 'Fresh daily harvest. Firm texture, perfect for traditional curries.', c1: '#4A72B8', c2: '#1E3A70', image: 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=800&q=85' },
   { id: 'f2', name: 'Katla', cat: 'Freshwater', price: 340, stock: 18, status: 'available', farm: 'Godavari Basin Farm', desc: 'Large sweet-water fish. Rich in Omega-3 and vitamin B12.', c1: '#3B82F6', c2: '#1D4ED8', image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=800&q=85' },
   { id: 'f3', name: 'Vannamei Prawns', cat: 'Shellfish', price: 450, stock: 8, status: 'available', farm: 'Nellore Coastal Farm', desc: 'Cleaned, devined fresh prawns. Medium size, sweet natural flavor.', c1: '#FF6B4A', c2: '#C23010', image: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=800&q=85' },
   { id: 'f4', name: 'Black Pomfret', cat: 'Marine', price: 780, stock: 4, status: 'available', farm: 'Kakinada Deep Sea', desc: 'Wild caught seawater pomfret. Premium delicacy, single bone structure.', c1: '#2563EB', c2: '#1E40AF', image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=85' },
   { id: 'f5', name: 'Tilapia', cat: 'Freshwater', price: 240, stock: 14, status: 'available', farm: 'Warangal Organic Ponds', desc: 'Mild flavor, lean white meat. Great for frying and grilling.', c1: '#60A5FA', c2: '#2563EB', image: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=800&q=85' },
-  { id: 'f6', name: 'Murrel (Korameenu)', cat: 'Freshwater', price: 620, stock: 0, status: 'coming', farm: 'Warangal Organic Ponds', desc: 'Highly prized freshwater delicacy. Arrival expected in truck.', c1: '#818CF8', c2: '#4F46E5', image: 'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?auto=format&fit=crop&w=800&q=85' },
+  { id: 'f6', name: 'Murrel (Korameenu)', cat: 'Freshwater', price: 620, stock: 0, status: 'coming', farm: 'Warangal Organic Ponds', desc: 'Highly prized freshwater delicacy. Arrival expected in truck.', c1: '#818CF8', c2: '#4F46E5', image: 'https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=800&q=85' },
 ];
 
 const INITIAL_NOTIFS: NotificationItem[] = [
@@ -154,6 +200,7 @@ export const PondFishProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [eta, setEta] = useState(42);
   const [published, setPublished] = useState(true);
   const [fishCatalog, setFishCatalog] = useState<FishItem[]>(INITIAL_FISH);
+  const [subPlans, setSubPlans] = useState<SubPlan[]>(INITIAL_SUB_PLANS);
   const [notifs, setNotifs] = useState<NotificationItem[]>(INITIAL_NOTIFS);
   const [workerPending, setWorkerPending] = useState<WorkerOrder[]>(INITIAL_WORKER_PENDING);
   const [workerDone, setWorkerDone] = useState<WorkerOrder[]>(INITIAL_WORKER_DONE);
@@ -367,6 +414,23 @@ export const PondFishProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     showToast(`New fish added to catalog`, 'fish');
   };
 
+  const updateSubPlan = (planId: string, updates: Partial<SubPlan>) => {
+    setSubPlans((prev) =>
+      prev.map((p) => (p.id === planId ? { ...p, ...updates } : p))
+    );
+    showToast(`Subscription plan updated`, 'wallet');
+  };
+
+  const addSubPlan = (plan: Omit<SubPlan, 'id' | 'subscribers'>) => {
+    const newPlan: SubPlan = {
+      ...plan,
+      id: 'sp' + Date.now(),
+      subscribers: 0,
+    };
+    setSubPlans((prev) => [...prev, newPlan]);
+    showToast(`New subscription plan tier created`, 'wallet');
+  };
+
   const togglePublishDelivery = () => {
     setPublished((prev) => {
       const next = !prev;
@@ -394,6 +458,7 @@ export const PondFishProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         eta,
         published,
         fishCatalog,
+        subPlans,
         bookings,
         notifs,
         workerPending,
@@ -408,6 +473,8 @@ export const PondFishProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         completeWorkerOrder,
         updateFishInventory,
         addFishItem,
+        updateSubPlan,
+        addSubPlan,
         togglePublishDelivery,
         markTruckArrived,
         markAllNotifsRead,
