@@ -105,9 +105,13 @@ export default function CustomerMarketPage() {
               </button>
             </div>
 
-            <div className="card bk-fish">
-              <div className="thumb">
-                <Icon name="fish" style={{ color: 'var(--teal)', width: 44, height: 44 }} />
+            <div className="card bk-fish" style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+              <div className="thumb" style={{ width: 64, height: 64, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: 'var(--sub)' }}>
+                {selectedFish.image ? (
+                  <img src={selectedFish.image} alt={selectedFish.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <Icon name="fish" style={{ color: 'var(--teal)', width: 36, height: 36, margin: '14px auto', display: 'block' }} />
+                )}
               </div>
               <div>
                 <b style={{ fontSize: 16 }}>{selectedFish.name}</b>

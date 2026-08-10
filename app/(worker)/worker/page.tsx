@@ -13,22 +13,92 @@ export default function WorkerPage() {
   const [showScanModal, setShowScanModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
+  // Camera permission & scanner states
+  const [camStatus, setCamStatus] = useState<'idle' | 'requesting' | 'active' | 'denied' | 'unsupported'>('idle');
+  const [camError, setCamError] = useState<string | null>(null);
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const streamRef = React.useRef<MediaStream | null>(null);
+
   const filteredPending = workerPending.filter((o) => {
     const q = search.toLowerCase();
     return !q || o.id.toLowerCase().includes(q) || o.cust.toLowerCase().includes(q) || o.phone.includes(q);
   });
 
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setCamStatus('idle');
+  };
+
+  const handleCloseScanner = () => {
+    stopCamera();
+    setShowScanModal(false);
+  };
+
+  const startCamera = async () => {
+    setCamStatus('requesting');
+    setCamError(null);
+
+    if (typeof window === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCamStatus('unsupported');
+      setCamError('Camera API is not supported on this browser or environment.');
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } },
+      });
+      streamRef.current = stream;
+      setCamStatus('active');
+
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+        }
+      }, 150);
+
+      // Simulate QR barcode match detection after 3.2s of active scanning
+      setTimeout(() => {
+        if (streamRef.current) {
+          stopCamera();
+          setShowScanModal(false);
+          const target = workerPending[0];
+          if (target) {
+            setSelectedOrder(target);
+            showToast(`Scanned QR pass ${target.id} successfully!`, 'qr');
+          }
+        }
+      }, 3200);
+    } catch (err: any) {
+      console.warn('Camera permission request error:', err);
+      setCamStatus('denied');
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setCamError('Camera permission was denied. Camera access is required to scan customer QR passes.');
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setCamError('No active camera device was detected on this device.');
+      } else {
+        setCamError(err.message || 'Unable to access device camera.');
+      }
+    }
+  };
+
   const handleScanQR = () => {
     setShowScanModal(true);
-    setTimeout(() => {
-      setShowScanModal(false);
-      const target = workerPending[0];
-      if (target) {
-        setSelectedOrder(target);
-        showToast('QR Code Scanned Successfully!', 'qr');
-      }
-    }, 2000);
+    startCamera();
   };
+
+  // Cleanup camera stream on unmount
+  React.useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+      }
+    };
+  }, []);
 
   const handleCompleteOrder = () => {
     if (!selectedOrder) return;
@@ -195,26 +265,100 @@ export default function WorkerPage() {
         </div>
       )}
 
-      {/* QR CAMERA SCANNER SIMULATION MODAL */}
+      {/* QR CAMERA SCANNER MODAL */}
       {showScanModal && (
-        <div className="ov">
-          <div className="ovcard" style={{ padding: 26, textAlign: 'center' }}>
-            <h3 style={{ fontFamily: 'var(--disp)', fontSize: 20, marginBottom: 4 }}>Scan Booking QR Code</h3>
-            <p style={{ fontSize: 13, color: 'var(--mut)', marginBottom: 14 }}>
-              Point camera at customer's phone pass.
-            </p>
-
-            <div className="scan-vp">
-              <div className="scan-corner sc-tl" />
-              <div className="scan-corner sc-tr" />
-              <div className="scan-corner sc-bl" />
-              <div className="scan-corner sc-br" />
-              <div className="scan-line" />
+        <div className="ov" onClick={handleCloseScanner}>
+          <div className="ovcard" onClick={(e) => e.stopPropagation()} style={{ padding: 26, textAlign: 'center', width: 440 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <h3 style={{ fontFamily: 'var(--disp)', fontSize: 20 }}>Scan Booking QR Code</h3>
+              <button className="btn ghost sm" onClick={handleCloseScanner}>
+                <Icon name="x" />
+              </button>
             </div>
 
-            <p style={{ fontSize: 12, color: 'var(--mut)' }}>
-              Detecting ticket <b className="mono">PF-20260807-00125</b>…
-            </p>
+            {camStatus === 'requesting' && (
+              <div className="scan-vp" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                <span className="spin" style={{ width: 32, height: 32, borderWidth: 3, marginBottom: 12 }}></span>
+                <b>Requesting Camera Permission…</b>
+                <small style={{ opacity: 0.8, fontSize: 12, marginTop: 6, maxWidth: 260 }}>
+                  Please allow camera access in your browser prompt to open scanner.
+                </small>
+              </div>
+            )}
+
+            {camStatus === 'active' && (
+              <div>
+                <p style={{ fontSize: 13, color: 'var(--mut)', marginBottom: 12 }}>
+                  Position customer's QR ticket within the scanner frame.
+                </p>
+                <div className="scan-vp">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                  <div className="scan-corner sc-tl" />
+                  <div className="scan-corner sc-tr" />
+                  <div className="scan-corner sc-bl" />
+                  <div className="scan-corner sc-br" />
+                  <div className="scan-line" />
+                </div>
+                <p style={{ fontSize: 12, color: 'var(--mut)' }}>
+                  Detecting ticket <b className="mono">PF-20260807-00125</b>…
+                </p>
+              </div>
+            )}
+
+            {(camStatus === 'denied' || camStatus === 'unsupported') && (
+              <div>
+                <div
+                  className="scan-vp"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#1E1015',
+                    color: '#FF6B6B',
+                    padding: 20,
+                    textAlign: 'center',
+                  }}
+                >
+                  <div style={{ width: 54, height: 54, borderRadius: '50%', background: 'rgba(255,107,107,0.15)', display: 'grid', placeItems: 'center', marginBottom: 12 }}>
+                    <Icon name="x" style={{ width: 28, height: 28, color: '#FF6B6B' }} />
+                  </div>
+                  <b style={{ fontSize: 16, color: '#FFF' }}>Camera Access Required</b>
+                  <p style={{ fontSize: 12.5, color: '#E2E8F0', marginTop: 6, lineHeight: 1.5, maxWidth: 300 }}>
+                    {camError || 'Camera permission is required to scan customer QR passes.'}
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+                  <button className="btn ghost block sm" onClick={handleCloseScanner}>
+                    Cancel
+                  </button>
+                  <button className="btn block sm" onClick={startCamera}>
+                    <Icon name="qr" /> Retry Camera Permission
+                  </button>
+                </div>
+
+                {workerPending.length > 0 && (
+                  <button
+                    className="btn linky block"
+                    style={{ marginTop: 12, fontSize: 12.5 }}
+                    onClick={() => {
+                      stopCamera();
+                      setShowScanModal(false);
+                      setSelectedOrder(workerPending[0]);
+                    }}
+                  >
+                    Select {workerPending[0].id} manually →
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -15,6 +15,7 @@ export default function AdminInventoryPage() {
   const [newFishCat, setNewFishCat] = useState('Freshwater');
   const [newFishPrice, setNewFishPrice] = useState(300);
   const [newFishStock, setNewFishStock] = useState(10);
+  const [newFishImage, setNewFishImage] = useState('');
 
   const filtered = fishCatalog.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
   const totalStock = fishCatalog.reduce((acc, f) => acc + f.stock, 0);
@@ -35,9 +36,11 @@ export default function AdminInventoryPage() {
       status: 'available',
       farm: 'Sri Lakshmi Organic Ponds, Warangal',
       desc: 'Freshly added to catalog.',
+      image: newFishImage || 'https://images.unsplash.com/photo-1534483509719-3feaee7c30da?auto=format&fit=crop&w=800&q=85',
     });
     setShowAddModal(false);
     setNewFishName('');
+    setNewFishImage('');
   };
 
   return (
@@ -87,8 +90,12 @@ export default function AdminInventoryPage() {
       <div style={{ display: 'grid', gap: 10 }}>
         {filtered.map((f) => (
           <button key={f.id} className="inv-row" onClick={() => setEditingFish({ ...f })}>
-            <div className="thumb">
-              <Icon name="fish" style={{ color: 'var(--teal)', width: 42, height: 42 }} />
+            <div className="thumb" style={{ width: 44, height: 44, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: 'var(--sub)' }}>
+              {f.image ? (
+                <img src={f.image} alt={f.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <Icon name="fish" style={{ color: 'var(--teal)', width: 32, height: 32, margin: '6px auto', display: 'block' }} />
+              )}
             </div>
             <div className="nm">
               <b>{f.name}</b>
@@ -177,6 +184,16 @@ export default function AdminInventoryPage() {
                 />
               </div>
 
+              <div className="field">
+                <label>Image URL</label>
+                <input
+                  type="text"
+                  placeholder="https://..."
+                  value={editingFish.image || ''}
+                  onChange={(e) => setEditingFish({ ...editingFish, image: e.target.value })}
+                />
+              </div>
+
               <button className="btn block" onClick={handleSaveInventory}>
                 Save Changes
               </button>
@@ -229,6 +246,16 @@ export default function AdminInventoryPage() {
                   step="0.5"
                   value={newFishStock}
                   onChange={(e) => setNewFishStock(parseFloat(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="field">
+                <label>Image URL</label>
+                <input
+                  type="text"
+                  placeholder="https://..."
+                  value={newFishImage}
+                  onChange={(e) => setNewFishImage(e.target.value)}
                 />
               </div>
 

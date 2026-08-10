@@ -7,6 +7,7 @@ import { usePondFish, FishItem } from '@/lib/context';
 import { Icon } from '@/lib/icons';
 import { FishCard } from '@/components/FishCard';
 import { TruckTrackerWidget } from '@/components/TruckTrackerWidget';
+import { AppQRCode } from '@/components/AppQRCode';
 
 export default function LandingPage() {
   const { fishCatalog, showToast } = usePondFish();
@@ -200,10 +201,21 @@ export default function LandingPage() {
               </button>
             </div>
 
-            <div style={{ background: 'linear-gradient(135deg, ' + selectedFish.c1 + ' 0%, ' + selectedFish.c2 + ' 100%)', borderRadius: 12, padding: 24, textAlign: 'center', color: '#fff', marginBottom: 18 }}>
-              <Icon name="fish" style={{ width: 64, height: 64, margin: '0 auto' }} />
-              <b style={{ fontSize: 20, display: 'block', marginTop: 8 }}>₹{selectedFish.price} / Kg</b>
-              <small style={{ opacity: 0.9 }}>{selectedFish.stock} Kg available in store today</small>
+            <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', height: 180, marginBottom: 18, background: `linear-gradient(135deg, ${selectedFish.c1} 0%, ${selectedFish.c2} 100%)` }}>
+              {selectedFish.image ? (
+                <img
+                  src={selectedFish.image}
+                  alt={selectedFish.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <Icon name="fish" style={{ width: 64, height: 64, margin: '30px auto 0', display: 'block', color: '#fff' }} />
+              )}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.1) 60%)' }} />
+              <div style={{ position: 'absolute', bottom: 14, left: 16, right: 16, color: '#fff', zIndex: 2 }}>
+                <b style={{ fontSize: 22, display: 'block' }}>₹{selectedFish.price} <small style={{ fontSize: 13, fontWeight: 500, opacity: 0.9 }}>/ Kg</small></b>
+                <small style={{ opacity: 0.95 }}>{selectedFish.stock > 0 ? `${selectedFish.stock} Kg available in store today` : 'Sold out'}</small>
+              </div>
             </div>
 
             <div className="info-rows" style={{ marginBottom: 18 }}>
@@ -368,8 +380,8 @@ export default function LandingPage() {
               <div className="notch" />
               <b style={{ fontFamily: 'var(--disp)', fontSize: 18, color: 'var(--ink)' }}>PondFish App</b>
               <p style={{ marginTop: 6, fontSize: 12 }}>Scan to install Capacitor native build</p>
-              <div style={{ background: '#fff', border: '1px solid var(--line)', padding: 12, borderRadius: 10, marginTop: 12 }}>
-                <Icon name="qr" style={{ width: 100, height: 100, margin: '0 auto' }} />
+              <div style={{ marginTop: 14, textAlign: 'center' }}>
+                <AppQRCode size={120} />
               </div>
             </div>
           </div>
